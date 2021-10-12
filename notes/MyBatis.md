@@ -671,32 +671,19 @@ selectKey 会将 `SELECT LAST_INSERT_ID()` 的结果放入到传入的 model 的
 
 
 
-## 占位符
+## #{}和${}
 
-### #{}
+`#{}` 和 `${}`  都是占位符：
 
-`#{} `表示一个占位符号
+- `${}` 表示拼接 sql 语句
 
-通过 `#{}` 可以实现 preparedStatement 向占位符中设置值，自动进行java类型和jdbc类型转换，
-痛死，`#{}` 可以有效防止sql注入。
+  `where username=${username}`，如果传入的值是 111 ，那么解析成 sql 时的值为 `where username=111`
 
-### ${}
+- `#{}` 将传入的数据都当成一个字符串，会对自动传入的数据加一个双引号。**可以很大程度防止 SQL 注入**
 
-`${}` 表示拼接 sql 语句
+  `where username=#{username}`，如果传入的值是 111 ，那么解析成 sql 时的值为 `where username="111"`
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+总结：一般能用 # 的就别用 $
 
 
 
@@ -708,10 +695,10 @@ trim 元素的主要功能是可以在包含的内容前加上某些前缀，也
 
 | 属性            | 描述                                                         |
 | --------------- | ------------------------------------------------------------ |
-| prefix          | 给sql语句拼接的前缀                                          |
-| suffix          | 给sql语句拼接的后缀                                          |
-| prefixOverrides | 去除sql语句前面的关键字或者字符，该关键字或者字符由prefixOverrides属性指定，假设该属性指定为"AND"，当sql语句的开头为"AND"，trim标签将会去除该"AND" |
-| suffixOverrides | 去除sql语句后面的关键字或者字符，该关键字或者字符由suffixOverrides属性指定 |
+| prefix          | 给 sql 语句拼接的前缀                                        |
+| suffix          | 给 sql 语句拼接的后缀                                        |
+| prefixOverrides | 去除 sql 语句前面的关键字或者字符，该关键字或者字符由 prefixOverrides 属性指定，假设该属性指定为“AND”，当 sql 语句的开头为“AND”，trim 标签将会去除该“AND” |
+| suffixOverrides | 去除sql语句后面的关键字或者字符，该关键字或者字符由 suffixOverrides 属性指定 |
 
 
 
@@ -731,15 +718,13 @@ trim 元素的主要功能是可以在包含的内容前加上某些前缀，也
 </select>
 ```
 
-但是，添加了 `where 1 = 1` 的过滤条件之后，数据库系统就无法使用索引等查询优化策略，将会被迫对每行数据进行扫描（即全表扫描） 来比较此行是否满足过滤条件，当表中的数据量较大时查询速度会非常慢；此外，还会存在SQL注入的风险。
+但是，添加了 `where 1 = 1` 的过滤条件之后，数据库系统就无法使用索引等查询优化策略，将会被迫对每行数据进行扫描（即全表扫描） 来比较此行是否满足过滤条件，当表中的数据量较大时查询速度会非常慢；此外，还会存在 SQL 注入的风险。
 
 所以，推荐使用 `<where>` 标签
 
 
 
 ## where
-
-
 
 ```xml
 <select id="findByCondition02" resultType="User">
@@ -1446,6 +1431,18 @@ public interface UserMapper {
 ```
 
 ```
+
+
+
+
+
+
+
+
+
+# FAQ
+
+## 如何防止 SQL 注入？
 
 
 

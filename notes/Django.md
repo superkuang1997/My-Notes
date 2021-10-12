@@ -1425,65 +1425,13 @@ def get_students(request):
 
 # RESTful
 
-##  REST的概念
-
-一种软件架构风格、设计风格、而不是标准，只是提供了一组设计原则和约束条件。它主要用于户客户端和服务器交互类的软件。基于这个风格设计的软件可以更简洁，更有层次，更易于实现缓存机制等。
-
-REST全称是Representational State Transfer，**表征性状态转移**。REST的释义是指**“表现层状态转化”**，其实这省略了主语。“表现层"其实指的是“资源（Resource）”的表现层，所以**面向资源**是REST最显著的特征，符合REST的设计风格被称为RESTful。
-
-**资源（Resource）**
-
-所谓”资源”，就煌网络上的一个实体，或者说是网络上的一个具体信息。它可以是一段文本，一张图片，一首歌曲，一种服务，总之就是一个具体的实例。你可以使用一个URI（统一资源定位符）指向它，每种资源对应一个特定的URl。要获取这个资源，访问它的URI就可以了，因此URI就成了每一个资源的地址或独一无二的识别符。所谓“上网“就是与互联网上一系列的“资源”互动，调用它们的URI。
-
-**表现层（Representation）**
-
-“资源”是一种信息实体，它可以有多种外在表现形式。我们把“资源”具体呈现出来的形式，叫做它的”表现
-
-层”（Representation）。
-
-URI只代表资源的实体，代表它的形式。严格地说，有些网站最后的".html"后缀名是不必要的，因为这个后缀表示格式，属于”表现层“范畴，而URI应该只代表“资源”的位置。它的具体表现形式，应该在HTTP请求头的信息中使用Accept和Content-Type字段指定。
-
-**状态转换（State Transfer）**
-
-访问一个网站，就代表客户端和服务端的一个互动过程。在这个过程中，势必涉及到数据和状态的变化。
-
-互联网通信协议HTTP协议，是一个无状态协议。这意味着，所有的状态都保存在服务端。因此，如果客户端想要操作服务器，就必须通过某种手段，让服务器端发生“状态转换（State Transfer）”。而这种转换是建立在表现层之上的，所以就是”表现层状态转化"。
-
-客户端用到的手段，只能是HTTP协议。具体来说，就是HTTP协议中，四个表示操作方式的动词：GET,POST,PUT,DELETE。它们分别对应四种基本操作：GET用来获取资源，POST用来新建或更新资源，PUT用来更新资源，DELETE用来删除资源
-
-### 到底什么是RESTful架构
+到底什么是 RESTful 架构？
 
 1. 每一个URI代表一种资源
 
 2. 客户端和服务器之间，传递这种资源的某种表现层
 
 3. 客户端通过四个HTTP动词，对服务端资源进行操作，实现“表现层状态转换”
-
-
-
-### 状态码
-
-200 OK-[GE]：服务器成功返回用户请求的数据
-
-201 CREATED-[POST/PUT/PATCH]：用户新建或修改数据成功
-
-202 Accepted-[]：表示一个请求已经进入后台排队（异步任务）
-
-204 NO CONTENT-[DELETE]：表示数据删除成功
-
-400 INVALID REQUEST-[POST/PUT/PATCH]：用户发出的请求有错误
-
-401 Unauthorized-[]：表示用户没有权限（令牌，用户名，密码错误）
-
-403 Forbidden-[]：表示用户得到授权，但是访问是被禁止的
-
-404 NOT FOUND-[]：用户发出的请求针对的是不存在的记录
-
-406 Not Acceptable-[]：用户请求格式不可得
-
-410 Gone-[GET]：用户请求的资源被永久移除，且不会再得到的
-
-422 Unprocesable entity-[POST/PUT/PATCH]：当创建一个对象时，发生一个验证错误500INTERNAL SERVER EROR-[]：服务器内部发生错误
 
 
 
@@ -1510,7 +1458,7 @@ from .schoolAPI import *
 
 > 这里的CBV是纯Django实现，后面会介绍基于RESTful Framework的CBV
 
-### 1  创建类视图
+### 创建类视图
 
 ```python
 - views.py
@@ -1523,7 +1471,7 @@ class HelloCBV(View):
         pass
 ```
 
-### 2  路由注册
+### 路由注册
 
 as_view是类方法，只能通过类调用，不能通过对象调用，它是类视图的入口点。
 
@@ -1533,9 +1481,11 @@ as_view是类方法，只能通过类调用，不能通过对象调用，它是�
 path('hello/<int:uid>/', views.HelloCBV.as_view(), name='hello'),
 ```
 
-### 3 类视图的类型
 
-Django提供了数量众多的类视图，但是相关的文档并不完善，想要彻底了解某一类视图的功能必须查看其源码，由于封装程度很高，使用时也必须按照Django规定的方式，所以不利于团队开发使用。
+
+### 类视图的类型
+
+Django 提供了数量众多的类视图，但是相关的文档并不完善，想要彻底了解某一类视图的功能必须查看其源码，由于封装程度很高，使用时也必须按照Django规定的方式，所以不利于团队开发使用。
 
 - 基本视图：view、TemplateView、RedirectView
 
@@ -1568,7 +1518,7 @@ class HelloTemplateView(TemplateView):
 
 
 
-### 4  在类视图中使用装饰器
+### 在类视图中使用装饰器
 
 在类视图中使用为函数视图准备的装饰器时，不能直接添加装饰器，需要使用method_decorator将其转换为适用于类视图方法的装饰器。
 
@@ -1691,7 +1641,7 @@ class Person(models.Model):
 
 Django-RESTful有以下几种常用的序列化器：
 
-### 1 Serializer
+### Serializer
 
 ```python
 - serializes.py
@@ -1736,7 +1686,9 @@ class PersonView(View)
         return JsonResponse(person_serializer.data)
 ```
 
-### 2 ModelSerializer
+
+
+### ModelSerializer
 
 `serializers.Serializer`通过精确指定字段可以实现数据的序列化，但代码量比较大；`serializers.ModelSerializer`可以简化指定字段的步骤，能够让你自动创建一个具有模型中相应字段的Serializer类，同时默认简单实现了create方法和update方法。
 
@@ -1750,7 +1702,9 @@ class PersonSerializer(serializers.ModelSerializer):
         fields = ('p_name', 'p_age', 'p_sex')
 ```
 
-### 3 HyperlinkedModelSerializer
+
+
+### HyperlinkedModelSerializer
 
 用法和`ModelSerializer`基本相似，不通电是可以在fields中指定`url`字段
 
@@ -1762,7 +1716,7 @@ fields = ('url', 'p_name', 'p_age', 'p_sex')
 
 ##  Request and Response
 
-### 1 Request
+### Request
 
 REST框架引入了一个扩展了常规HttpRequest的Request对象，并提供了更灵活的请求解析。REST框架的request的类型为`<class 'rest_framework.request.Request'>`，将Django中的request作为自己的属性，`request._request`表示`<class 'django.core.handlers.wsgi.WSGIRequest'>`。
 
@@ -1784,7 +1738,7 @@ Request对象的核心功能是request.data属性，它与request.POST类似，�
 | auth                     | 认证，在请求上附加属性，属性值为token        |
 | successful_authenticator | 认证成功                                     |
 
-### 2  Response
+### Response
 
 REST框架还引入了一个Response对象，这是一种获取未渲染（unrendered）内容的TemplateResponse类型，并使用内容协商来确定返回给客户端的正确内容类型。
 
@@ -1802,7 +1756,7 @@ if book_serializer.is_valid():
 
 
 
-### 3  Status codes
+### Status codes
 
 纯数字的状态码并不是很容易被理解，所以REST框架为status模块中的每个状态代码提供更明确的标识符。使用它们来代替纯数字的HTTP状态码是个很好的主意。
 
@@ -1812,7 +1766,7 @@ from rest_framework import status
 
 
 
-### 4  wrapping
+### wrapping
 
 REST框架提供了两个可用于编写API视图的包装器（wrappers）
 
@@ -1859,7 +1813,7 @@ REST框架提供了两个可用于编写API视图的包装器（wrappers）
 
 Django RESTful CBV提供了比原生CBV更为强大的功能
 
-### 1  APIView
+### APIView
 
 ```python
 from rest_framework.views import APIView
@@ -1885,7 +1839,7 @@ class AnimalView(APIView):
 
 > RESTful Framework提供了一系列可继承的视图类，总体来说，ViewSet的封装程度较高，代码可读性较低，需要开发者对源码有深入的理解；相对而言，继承APIView则是对Django原生CBV一定程度上拓展，代码可读性较高，所以继承APIView是一种较为方便的选择。
 
-### 2  Mixins
+### Mixins
 
 ```python
 - views.py
@@ -2377,5 +2331,4 @@ class RegisterForm(ModelForm):
         print('用户名验证成功！')
         return username
 ```
-
 

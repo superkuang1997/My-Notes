@@ -1,6 +1,6 @@
 # Spring🍀
 
-Spring是分层的 Java SE/EE 应用全栈轻量级开源框架，以 IoC（反转控制）和 AOP（面向切面编程）为内核，提供了表现层 Spring MVC 和持久层 Spring JDBC 以及业务层事务管理等众多的企业级应用技术，还能整合开源世界众多著名的第三方框架和类库。
+Spring 是分层的 Java SE/EE 应用全栈轻量级开源框架，以 IOC（反转控制）和 AOP（面向切面编程）为内核，提供了表现层 Spring MVC 和持久层 Spring JDBC 以及业务层事务管理等众多的企业级应用技术，还能整合开源世界众多著名的第三方框架和类库。
 
 ## 参考文档
 
@@ -63,7 +63,7 @@ Maven中配置 spring-context 依赖
 
 通过控制反转，对象在被创建的时候，由一个调控系统内所有对象的外界实体将其所依赖的对象的引用传递给它。也可以说，依赖被注入到对象中。
 
-使用 IOC 之前，创建对象的主动权和创建时机是由自己把控的，现在这种权力转移到第三方，比如转移交给了IOC容器。对象A获得依赖对象B的过程，由主动行为变为了被动行为，控制权颠倒过来了，这就是 “控制反转” 的由来，即获得依赖对象的过程反转了。
+使用 IOC 之前，创建对象的主动权和创建时机是由自己把控的，现在这种权力转移到第三方，比如转移交给了 IOC 容器。对象 A 获得依赖对象 B 的过程，由主动行为变为了被动行为，控制权颠倒过来了，这就是 “控制反转” 的由来，即获得依赖对象的过程反转了。
 
 IOC 最常见的实现方式叫做依赖注入（Dependency Injection，DI）。
 
@@ -986,6 +986,8 @@ public class DataSource {
 
 
 
+
+
 # AOP🍀
 
 面向切面编程（Aspect Oriented Programming，AOP）是一种编程思想，是面向对象编程（OOP）的一种补充。
@@ -1016,7 +1018,7 @@ public class DataSource {
 
 要求：被代理类的至少要实现一个接口，否则无法使用动态代理
 
----
+
 
 `newProxyInstance` 方法的参数：
 
@@ -1051,7 +1053,7 @@ public class Client {
 }
 ```
 
-重写的 `invoke` 方法：执行被代理对家的任何接口方法都会经过该方法
+重写的 `invoke()` 方法：执行被代理对家的任何接口方法都会经过该方法
 
 - Object proxy：代理对象的引用
 - Method method：当前执行的方法
@@ -1093,9 +1095,9 @@ public class Client {
 
 ### 基于子类的动态代理（cglib）
 
-基于子类的动态代理基于第三方cglib库
+基于子类的动态代理基于第三方 cglib 库
 
-首先导入maven依赖
+首先导入 maven 依赖
 
 ```xml
 <dependency>
@@ -1107,17 +1109,15 @@ public class Client {
 
 涉及的类：`Enhancer` 
 
-提供者：第三方cglib库
+提供者：第三方 cglib 库
 
 如何创建代理对象：使用 `Enhancer` 类中的 `create` 方法
 
-要求：被代理类不能是final修饰的最终类  
+要求：被代理类不能是 final 修饰的最终类  
 
 
 
----
-
-`create` 方法的参数：
+`create()` 方法的参数：
 
 - Class：字节码，用于指定被代理对象的字节码
 - Callback：接口类型，用于提供增强的代码，一般是传递一个该接口的实现类，通常情况下都是匿名内部类，一般写的都是该接口的子接口实现类 `MethodInterceptor`
@@ -1163,7 +1163,7 @@ public class Client {
 }
 ```
 
-`intercept` 方法的参数：
+`intercept()` 方法的参数：
 
 - Object proxy：代理对象的引用
 - Method method：当前执行的方法
@@ -1197,7 +1197,7 @@ public class Client {
 
 ### 两种动态代理实现的区别
 
-jdk动态代理具体实现原理：
+jdk 动态代理具体实现原理：
 
 - 通过实现 `InvocationHandler` 接口创建自己的调用处理器；
 
@@ -1209,19 +1209,19 @@ jdk动态代理具体实现原理：
 
 
 
-cglib动态代理：
+cglib 动态代理：
 
-- 利用ASM开源包，对代理对象类的class文件加载进来，通过修改其字节码生成子类来处理
+- 利用 ASM 开源包，对代理对象类的 class 文件加载进来，通过修改其字节码生成子类来处理
 
-- 通过字节码底层继承要代理类来实现，因此如果被代理类被final关键字所修饰，会失败。
+- 通过字节码底层继承要代理类来实现，因此如果被代理类被 final 关键字所修饰，会失败。
 
 
 
 总结：
 
-- 如果要被代理的对象是个实现类，那么Spring会使用JDK动态代理来完成操作（Spirng默认采用JDK动态代理）
+- 如果要被代理的对象是个实现类（实现了一个接口），那么 Spring 会使用 JDK 动态代理来完成操作（Spring默认采用 JDK 动态代理）
 
-- 如果要被代理的对象不是个实现类，那么Spring会强制使用CGLib来实现动态代理
+- 如果要被代理的对象不是个实现类，那么 Spring 会强制使用 CGLib 来实现动态代理
 
 
 
@@ -1618,11 +1618,77 @@ public class Logger {
 
 
 
+
+
+
+
+# 事务🍀
+
+## 配置方式
+
+Spring 支持编程式事务管理以及声明式事务管理两种方式。
+
+
+
+### 编程式事务管理
+
+编程式事务管理是侵入性事务管理，使用 `TransactionTemplate` 或者直接使用 `PlatformTransactionManager`，对于编程式事务管理，Spring 推荐使用 `TransactionTemplate` 。
+
+
+
+### 声明式事务管理
+
+声明式事务管理建立在 AOP 之上，其本质是对方法前后进行拦截，然后在目标方法开始之前创建或者加入一个事务，执行完目标方法之后根据执行的情况提交或者回滚。
+编程式事务每次实现都要单独实现，但业务量大功能复杂时，使用编程式事务无疑是痛苦的，而声明式事务不同，声明式事务属于无侵入式，不会影响业务逻辑的实现，只需要在配置文件中做相关的事务规则声明或者通过注解的方式，便可以将事务规则应用到业务逻辑中。
+显然声明式事务管理要优于编程式事务管理，这正是Spring倡导的非侵入式的编程方式。唯一不足的地方就是声明式事务管理的粒度是方法级别，而编程式事务管理是可以到代码块的，但是可以通过提取方法的方式完成声明式事务管理的配置。
+
+
+
+
+
+## 事务的传播机制
+
+事务的传播性一般用在事务嵌套的场景，比如一个事务方法里面调用了另外一个事务方法，那么两个方法是各自作为独立的方法提交还是内层的事务合并到外层的事务一起提交，这就是需要事务传播机制的配置来确定怎么样执行。
+
+常用的事务传播机制如下：
+
+- `PROPAGATION_REQUIRED`
+
+  Spring默认的传播机制，能满足绝大部分业务需求，如果外层有事务，则当前事务加入到外层事务，一块提交，一块回滚。如果外层没有事务，新建一个事务执行
+
+- `PROPAGATION_REQUES_NEW`
+
+  该事务传播机制是每次都会新开启一个事务，同时把外层事务挂起，当当前事务执行完毕，恢复上层事务的执行。如果外层没有事务，执行当前新开启的事务即可
+
+- `PROPAGATION_SUPPORT`
+
+  如果外层有事务，则加入外层事务，如果外层没有事务，则直接使用非事务方式执行。完全依赖外层的事务
+
+- `PROPAGATION_NOT_SUPPORT`
+
+  该传播机制不支持事务，如果外层存在事务则挂起，执行完当前代码，则恢复外层事务，无论是否异常都不会回滚当前的代码
+
+- `PROPAGATION_NEVER`
+
+  该传播机制不支持外层事务，即如果外层有事务就抛出异常
+
+- `PROPAGATION_MANDATORY`
+
+  与NEVER相反，如果外层没有事务，则抛出异常
+
+- `PROPAGATION_NESTED`
+
+  该传播机制的特点是可以保存状态保存点，当前事务回滚到某一个点，从而避免所有的嵌套事务都回滚，即各自回滚各自的，如果子事务没有把异常吃掉，基本还是会引起全部回滚的。
+
+
+
+
+
 # 声明式事务控制🍀
 
-Spring的事务控制都是基于 AOP 的，它既可以使用编程的方式实现，也可以使用配置的方式实现，这里学习的重点是使用配置的方式实现。
+Spring 的事务控制都是基于 AOP 的，它既可以使用编程的方式实现，也可以使用配置的方式实现，这里学习的重点是使用配置的方式实现。
 
-使用声明式的事务控制，需要导入以下maven依赖，spring-tx用于Spring框架中的事务控制。
+使用声明式的事务控制，需要导入以下 maven 依赖，spring-tx 用于Spring 框架中的事务控制。
 
 ```xml
 <dependency>
@@ -1812,6 +1878,22 @@ public class SpringConfig {
 
 在需要事务支持的地方使用 `@Transactional` 注解
 
+1. 事务的传播性：`@Transactional(propagation=Propagation.REQUIRED)`
+
+2. 事务的隔离级别：`@Transactional(isolation = Isolation.READ_UNCOMMITTED)`
+
+3. 只读：`@Transactional(readOnly=true)`
+
+4. 事务的超时性：`@Transactional(timeout=30)`
+
+5. 回滚：
+
+   指定单一异常类：`@Transactional(rollbackFor=RuntimeException.class)`
+
+   指定多个异常类：`@Transactional(rollbackFor={RuntimeException.class, Exception.class})`
+
+
+
 如果不同的方法需要不同的事务控制，则需要添加多个 `@Transactional` ，并传递响应的参数。
 
 ```java
@@ -1853,8 +1935,6 @@ public class AccountServiceImpl implements AccountService {
 
 
 
-
-
 # Spring-源码分析🍀
 
 ## 核心概念
@@ -1862,8 +1942,6 @@ public class AccountServiceImpl implements AccountService {
 ### BeanDefinition
 
 `BeanDefinition` 表示 bean 的定义，Spring 根据 `BeanDefinition` 来创建 bean 对象， `BeanDefinition` 有很多的属性用来描述 bean 。
-
-
 
 
 
@@ -1954,9 +2032,9 @@ public class YoruaFactory implements FactoryBean {
 
 将该类注入容器中，上述代码实际上对应了两个 bean 对象：
 
-1. bean id 为 `yorua `, bean 对象为 `getObject()` 方法所返回的 `User` 对象。
+1. bean id 为 `yorua ` ，bean 对象为 `getObject()` 方法所返回的 `User` 对象。
 
-2. bean id 为 `&yorua `, bean 对象为 `YoruaFactory` 类的实例对象。
+2. bean id 为 `&yorua ` ，bean 对象为 `YoruaFactory` 类的实例对象。
 
 ```java
 public class Main {
@@ -1986,6 +2064,8 @@ public class Main {
 `BeanFactory` 是访问 Spring 容器的最基本、也是最底层的接口，其中有很多获取单个 bean 的方法。
 
 `BeanFactory` 将利用 `BeanDefinition` 来生成 bean 对象， `BeanDefinition` 相当于 `BeanFactory` 的原材料，bean 对象就相当于 `BeanFactory` 所生产出来的产品。
+
+`BeanFactory` 只是一个接口，并不是 IOC 容器的具体实现，原始的 `BeanFactory` 无法支持 Spring 的许多功能，如 AOP 、Web 等。
 
 <img src="http://store.secretcamp.cn/uPic/image-202106051743028132021060517430316228861834qaPzA4qaPzA.png" alt="image-20210605174302813" style="zoom:50%;" />
 
@@ -2262,8 +2342,6 @@ public interface BeanFactoryPostProcessor {
 
 
 
-1. 
-
  
 
 ## 核心容器启动
@@ -2276,7 +2354,8 @@ public void refresh() throws BeansException, IllegalStateException {
   synchronized (this.startupShutdownMonitor) {
     // Prepare this context for refreshing.
     prepareRefresh();
-
+		
+    // 重要方法
     // 通知子类刷新内部bean工厂：创建BeanFactory，如果已有就销毁，没有就创建；
     // 解析xml以及扫描注解，将扫描到的bean配置属性封装到BeanDefinition对象中
     ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
@@ -2288,7 +2367,7 @@ public void refresh() throws BeansException, IllegalStateException {
       // 允许修改BeanFactory的后处理器配置，这是留给子类的扩展方法
       // 这一阶段所有bean定义都已加载，但没有bean被实例化。
       postProcessBeanFactory(beanFactory);
-
+			
       // 调用所有BeanFactoryPostProcessor
       invokeBeanFactoryPostProcessors(beanFactory);
 
@@ -2332,6 +2411,10 @@ public void refresh() throws BeansException, IllegalStateException {
 Bean 生命周期描述的是 Spring 中ー个 Bean 创建过程和销过程中所经历的步骤，其中 Bean 创建过程是重点。
 
 程序员可以利用 Bean 生命周期机制对 Bean 进行自定义加工。
+
+
+
+获取 bean 定义 -> 实例化 -> 属性赋值 -> 初始化 -> 销毁
 
 
 
@@ -2523,7 +2606,7 @@ Spring 在进行对象创建的时候，会依次从一级、二级、三级缓�
 
 1. 对于单例 bean，调用 `getSingleton()` 方法
 2. 在一级缓存中查询，因为当前对象未初始化过，所以一定获取不到
-3. 调用 `beforeSingletonCreation()` 方法 记录当前 beanName 到 `CurrentlyCreationSet`
+3. 调用 `beforeSingletonCreation()` 方法记录当前 beanName 到 `CurrentlyCreationSet`
 4. 调用 `singletonFactory.getObject()` 方法，之后会进入 `createBean()` 方法进入创建 A 的流程
 5. 通过 Class 拿到无参的 Constructor 构造器，进行反射创建 A 的对象
 6. 反射创建完毕，此时得到一个 A 的早期对象
@@ -2554,6 +2637,10 @@ Spring 在进行对象创建的时候，会依次从一级、二级、三级缓�
    - 将早期 A 对象提升到二级缓存
 6. 从二级缓存中返回早期 A 对象，完成 B 对象的依赖注入。
 7. 最终对象 B 加载完成，存放至一级缓存，并且将二三级缓存中有关 B 的数据清理掉
+
+
+
+单例 setter 依赖中使用 “无参构造器” 创建了早期对象并放入缓存，这是能够解决循环依赖的关键。
 
 
 
@@ -2589,7 +2676,7 @@ Spring 在进行对象创建的时候，会依次从一级、二级、三级缓�
 
 ### 原型依赖
 
-Spring 只会缓存单例 bean，不会缓存 "prototype" 作用域的 bean，所以这种情况下的循环依赖也无法解决。
+Spring 只会缓存单例 bean，不会缓存 “prototype” 作用域的 bean，所以这种情况下的循环依赖也无法解决。
 
 假设 A 是原型 bean：
 
@@ -2603,6 +2690,27 @@ Spring 只会缓存单例 bean，不会缓存 "prototype" 作用域的 bean，�
 
 
 
+# FAQ
+
+## Spring采用了哪些设计模式？🍀
+
+1. 简单工厂模式
+
+   Spring 中的 BeanFactory 就是简单工厂模式的体现，根据传入一个唯一的标识来获得 bean 对象，但是否是在传入参数后创建还是传入参数前创建这个要根据具体情况来定。
+
+2. 工厂方法模式
+
+   通常由应用程序直接使用 new 创建新的对象，为了将对象的创建和使用相分离，采用工厂模式,即应用程序将对象的创建及初始化职责交给工厂对象。
+
+3. 单例模式
+
+   保证一个类仅有一个实例，并提供一个访问它的全局访问点。 
+
+   在 Spring 中scope=singleton 的对象都是单例对象，Spring 中的单例模式完成了后半句话，即提供了全局的访问点BeanFactory。但没有从构造器级别去控制单例，这是因为 Spring 管理的是任意的 Java 对象。
+
+4. 代理模式
+
+   Spring 的 AOP 是基于代理模式
 
 
 

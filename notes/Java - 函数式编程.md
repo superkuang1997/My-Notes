@@ -653,276 +653,13 @@ public class function_demo {
 
 
 
-# Stream流☕
-
-## 流式思想概述
-
-Stream（流）是一个来自数据源的元素队列
-- 元素是特定类型的对象，形成一个队列。 Java中的 Stream 并不会存储元素，而是按需计算。
-- 数据源流的来源：可以是集合、数组等
-
-和以前的 Collection 操作不同，Stream操作还有两个基础的特征：
-
-- Pipelining：中间操作都会返回流对象本身。 这样多个操作可以串联成一个管道，如同流式风格（fluentstyle）。 这样做可以对操作进行优化， 比如延迟执行（laziness）和短路（short-circuiting）。
-- 内部迭代： 以前对集合遍历都是通过Iterator或者增强for的方式，显式的在集合外部进行迭代， 这叫做外部迭代。 Stream提供了内部迭代的方式，流可以直接调用遍历方法。
-
-当使用一个流的时候，通常包括三个基本步骤：
-
-获取一个数据源（source）→ 数据转换 → 执行操作获取想要的结果
-
-每次转换原有Stream对象不改变，返回一个新的Stream对象（可以有多次转换），这就允许对其操作可以像链条一样排列，变成一个管道。
-
-
-
-## 流的类型
-
-`stream` ：是顺序流，由主线程按顺序对流执行操作
-
-`parallelStream`：是并行流，内部以多线程并行执行的方式对流进行操作，但前提是流中的数据处理没有顺序要求，如果流中的数据量足够大，并行流可以加快处速度。
-
-<img src="http://store.secretcamp.cn/uPic/image-20210713000932487202107130009331626106173uVazNNuVazNN.png" alt="image-20210713000932487" style="zoom:40%;" />
-
-
-
-## 获取流
-
-`java.util.stream.Stream<T>` 是 Java 8新加入的最常用的流接口。（并不是一个函数式接口）
-获取一个流非常简单，有以下几种常用的方式：
-
-- 所有的 `Collection` 集合都可以通过 `stream()` 默认方法获取流；
-- `Stream` 接口的静态方法 `of()` 可以获取数组对应的流；
-- Arrays 工具类的 `stream()` 方法可以获取数组对应的流；
-
-
-
-## Optional
-
-`Optional   `类是一个可以为 `null` 的容器对象。如果值存在则 `isPresent()` 方法会返回 `true`，调用 `get()` 方法会返回该对象。
-
-它是一个容器：它可以保存类型 T 的值，或者仅仅保存 null 。
-
-- `<T> Optional<T> of(T value)` ：返回一个 `Optional`
-
-- `boolean isPresent()`：返回值是否存在
-
-- `T get()` ：获取值
-- `T orElse(T other)`：值存在则返回，否则返回 other
-
-
-
-## 常用方法
-
-流模型的操作很丰富，这里介绍一些常用的API。这些方法可以被分成两种：
-
-- 延迟方法：返回值类型仍然是 `Stream` 接口自身类型的方法，因此支持链式调用。（除了终结方法外，其余方法均为延迟方法。
-- 终结方法：返回值类型不再是 `Stream` 接口自身类型的方法，因此不再支持类似 `StringBuilder` 那样的链式调用。本小节中，终结方法包括 `count()` 和 `forEach()` 方法。
-
-### 延迟方法
-
-#### filter
-
-可以通过 `filter` 方法将一个流转换成另一个子集流。
-
-该接口接收一个 `Predicate` 函数式接口参数（可以是一个Lambda或方法引用）作为筛选条件。
-
-```java
-Stream<T> filter(Predicate<? super T> predicate);
-```
-
-基本使用：
-
-```java
-public class demo {
-    public static void main(String[] args) {
-        String[] arr = {"刘备", "曹操", "吕布", "刘三刀", "刘封", "刘邦"};
-        Stream<String> stream = Stream.of(arr);
-        stream.filter(name -> name.startsWith("刘"))
-                .filter(name -> name.length() == 2)
-                .forEach(name -> System.out.println(name));
-    }
-}
-```
-
-
-
-#### map
-
-如果需要将流中的元素映射到另一个流中，可以使用 `map` 方法。
-
-该接口需要一个 `Function` 函数式接口参数，可以将当前流中的 `T` 类型数据转换为另一种 `R` 类型的流。
-
-```java
-<R> Stream<R> map(Function<? super T, ? extends R> mapper);
-```
-
-基本使用：
-
-```java
-public class demo {
-    public static void main(String[] args) {
-        Stream<String> stream1 = Stream.of("96", "97", "98");
-        // 使用map方法，将字符串型整数，映射为Integer类型的整数
-        Stream<Integer> stream2 = stream1.map(s -> Integer.parseInt(s));
-        // 遍历stream流
-        stream2.forEach(integer-> System.out.println(integer));
-    }
-}
-```
-
-
-
-#### limit
-
-`limit` 方法可以对流进行截取，只取用前n个。
-
-参数是一个long型，如果集合当前长度大于参数则进行截取；否则不进行操作。
-
-基本使用：
-
-```java
-public class demo {
-    public static void main(String[] args) {
-        String[] arr = {"刘备", "曹操", "吕布", "刘三刀", "刘封", "刘邦"};
-        Stream<String> stream1 = Stream.of(arr);
-        Stream<String> stream2 = stream1.limit(5).limit(4).limit(3);
-        stream2.forEach(str -> System.out.println(str));
-    }
-}
-```
-
-
-
-#### skip
-
-如果希望跳过前几个元素，可以使用 `skip` 方法获取一个截取之后的新流。
-
-如果流的当前长度大于n，则跳过前n个；否则将会得到一个长度为0的空流。
-
-基本使用：
-
-```java
-public class demo {
-    public static void main(String[] args) {
-        String[] arr = {"刘备", "曹操", "吕布", "刘三刀", "刘封", "刘邦"};
-        Stream<String> stream1 = Stream.of(arr);
-        Stream<String> stream2 = stream1.skip(1).skip(2);
-        stream2.forEach(str -> System.out.println(str));
-    }
-}
-```
-
-
-
-### 终结方法
-
-#### forEach
-
-该方法接收一个 `Consumer` 接口函数，会将每一个流元素交给该函数进行处理。
-
-```java
-void forEach(Consumer<? super T> action);
-```
-
-
-
-基本使用：
-
-```java
-public class demo {
-    public static void main(String[] args) {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
-        stream.forEach(integer -> System.out.println(integer + 1));
-    }
-}
-```
-
-
-
-#### count
-
-与旧集合 `Collection` 当中的 `size` 方法一样，流提供 `count` 方法来数一数其中的元素个数
-
-该方法返回一个long值代表元素个数
-
-```java
-public class demo {
-    public static void main(String[] args) {
-        String[] arr = {"刘备", "曹操", "吕布", "刘三刀", "刘封", "刘邦"};
-        Stream<String> stream = Stream.of(arr);
-        long count = stream.count();
-        System.out.println(count);
-    }
-}
-```
-
-
-
-
-
-#### concat
-
-如果有两个流，希望合并成为一个流，那么可以使用 `Stream` 接口的静态方法 `concat` ：
-
-```java
-static <T> Stream<T> concat(Stream<? extends T> a, Stream<? extends T> b)
-```
-
-> 这是一个静态方法，与 java.lang.String 当中的 concat 方法是不同的。
-
-
-
-基本使用：
-
-```java
-public class demo {
-    public static void main(String[] args) {
-        String[] arr1 = {"刘备", "曹操", "吕布"};
-        String[] arr2 = {"刘三刀", "刘封", "刘邦"};
-        Stream<String> stream1 = Stream.of(arr1);
-        Stream<String> stream2 = Stream.of(arr2);
-        Stream<String> stream3 = Stream.concat(stream1, stream2);
-        stream3.forEach(str -> System.out.println(str));
-    }
-}
-```
-
-
-
-#### collect
-
-`collect()` 方法可以优雅的将一个对象的集合转化成另一个对象的集合
-
-`java.util.stream.Collectors` 
-
-```java
-<R, A> R collect(Collector<? super T, A, R> collector);
-```
-
-
-
-#### reduce
-
-
-
-
-
-#### orElse
-
-如果当前值存在则返回，否则返回other
-
-```java
-public T orElse(T other) {
-    return value != null ? value : other;
-}
-```
-
 
 
 # 方法引用☕
 
 ## 冗余的lambda表达式
 
-之前了解了匿名内部类实现接口的方法比较冗余，所以学习了写法上更简洁的 lambda 表达式，对于强迫症来说 lambda 表达式也挺冗余的，方法引用可以更进一步简化 lambda 表达式。
+之前了解了匿名内部类实现接口的方法比较冗余，所以学习了写法上更简洁的 lambda 表达式，但如果我们在 Lambda 中所指定的操作方案，已经有地方存在相同方案，那是否还有必要再写重复逻辑？
 
 首先定义一个函数式接口
 
@@ -937,10 +674,12 @@ public interface Printable {
 
 ```java
 public class demo {
-    public static void main(String[] args) {
-        // 使用lambda表达式
+    public static void1 main(String[] args) {
+        // 使用lambda表达式传递具体实现
         printString(s -> System.out.println(s));
-
+    }
+  	
+    // 该方法需要传递一个接口的实现类
     public static void printString(Printable printable) {
         printable.print("Hello World");
     }
@@ -976,6 +715,8 @@ public class demo {
 
 双冒号 `::` 为引用运算符，而它所在的表达式被称为方法引用，如果 lambda 要表达的函数方案已经存在于某个方法的实现中，那么则可以通过双冒号来引用该方法作为 lambda 的替代者。
 
+
+
 ### 语义分析
 
 上例中， `System.out` 对象中有一个重载的 `println(String)` 方法恰好就是我们所需要的。那么对于`printString` 方法的函数式接口参数，对比下面两种写法，完全等效：
@@ -992,7 +733,7 @@ public class demo {
 
 ### 推导与省略
 
-如果使用 lambda，那么根据 "可推导就是可省略" 的原则，无需指定参数类型，也无需指定的重载形式，它们都将被自动推导。而如果使用方法引用，也是同样可以根据上下文进行推导。
+如果使用 lambda，那么根据 “可推导就是可省略” 的原则，无需指定参数类型，也无需指定的重载形式，它们都将被自动推导。而如果使用方法引用，也是同样可以根据上下文进行推导。
 
 
 
@@ -1076,3 +817,282 @@ public class demo {
 
 
 ## 通过this引用本类成员方法
+
+
+
+
+
+
+
+# Stream Flow☕
+
+Stream（流）是一个来自数据源的元素队列
+
+- 元素是特定类型的对象，形成一个队列。 Java中的 Stream 并不会存储元素，而是按需计算。
+- 数据源流的来源：可以是集合、数组等
+
+
+
+和以前的 Collection 操作不同，Stream 操作还有两个基础的特征：
+
+- Pipelining：中间操作都会返回流对象本身。 这样多个操作可以串联成一个管道，如同流式风格（fluentstyle）。 这样做可以对操作进行优化， 比如延迟执行（laziness）和短路（short-circuiting）。
+- 内部迭代： 以前对集合遍历都是通过 Iterator 或者增强 for 循环的方式，显式的在集合外部进行迭代， 这叫做外部迭代。 Stream 提供了内部迭代的方式，流可以直接调用遍历方法。
+
+
+
+当使用一个流的时候，通常包括三个基本步骤：
+
+1. 获取一个数据源（source）
+2.  数据转换
+3. 执行操作获取想要的结果
+
+每次转换原有 Stream 对象不改变，返回一个新的 Stream 对象（可以有多次转换），这就允许对其操作可以像链条一样排列，变成一个管道。
+
+
+
+## 流的类型
+
+`stream` ：是顺序流，由主线程按顺序对流执行操作
+
+`parallelStream`：是并行流，内部以多线程并行执行的方式对流进行操作，但前提是流中的数据处理没有顺序要求，如果流中的数据量足够大，并行流可以加快处速度。
+
+<img src="http://store.secretcamp.cn/uPic/image-20210713000932487202107130009331626106173uVazNNuVazNN.png" alt="image-20210713000932487" style="zoom:40%;" />
+
+
+
+## 获取流
+
+`java.util.stream.Stream<T>` 是 Java 8 新加入的最常用的流接口。（并不是一个函数式接口）
+获取一个流非常简单，有以下几种常用的方式：
+
+- 所有的 `Collection` 集合都可以通过 `stream()` 默认方法获取流；
+- `Stream` 接口的静态方法 `of()` 可以获取数组对应的流；
+- Arrays 工具类的 `stream()` 方法可以获取数组对应的流；
+
+
+
+## Optional
+
+`Optional    `类是一个可以为 `null` 的容器对象。如果值存在则 `isPresent()` 方法会返回 `true`，调用 `get()` 方法会返回该对象。
+
+它是一个容器：它可以保存类型 T 的值，或者仅仅保存 null 。
+
+- `<T> Optional<T> of(T value)` ：返回一个 `Optional`
+
+- `boolean isPresent()`：返回值是否存在
+
+- `T get()` ：获取值
+- `T orElse(T other)`：值存在则返回，否则返回 other
+
+
+
+## 延迟方法
+
+延迟方法：返回值类型仍然是 `Stream` 接口自身类型的方法，因此支持链式调用。（除了终结方法外，其余方法均为延迟方法。
+
+### filter
+
+可以通过 `filter` 方法将一个流转换成另一个子集流。
+
+该接口接收一个 `Predicate` 函数式接口参数（可以是一个Lambda或方法引用）作为筛选条件。
+
+```java
+Stream<T> filter(Predicate<? super T> predicate);
+```
+
+基本使用：
+
+```java
+public class demo {
+    public static void main(String[] args) {
+        String[] arr = {"刘备", "曹操", "吕布", "刘三刀", "刘封", "刘邦"};
+        Stream<String> stream = Stream.of(arr);
+        stream.filter(name -> name.startsWith("刘"))
+                .filter(name -> name.length() == 2)
+                .forEach(name -> System.out.println(name));
+    }
+}
+```
+
+
+
+### map
+
+如果需要将流中的元素映射到另一个流中，可以使用 `map` 方法。
+
+该接口需要一个 `Function` 函数式接口参数，可以将当前流中的 `T` 类型数据转换为另一种 `R` 类型的流。
+
+```java
+<R> Stream<R> map(Function<? super T, ? extends R> mapper);
+```
+
+基本使用：
+
+```java
+public class demo {
+    public static void main(String[] args) {
+        Stream<String> stream1 = Stream.of("96", "97", "98");
+        // 使用map方法，将字符串型整数，映射为Integer类型的整数
+        Stream<Integer> stream2 = stream1.map(s -> Integer.parseInt(s));
+        // 遍历stream流
+        stream2.forEach(integer-> System.out.println(integer));
+    }
+}
+```
+
+
+
+### limit
+
+`limit` 方法可以对流进行截取，只取用前n个。
+
+参数是一个long型，如果集合当前长度大于参数则进行截取；否则不进行操作。
+
+基本使用：
+
+```java
+public class demo {
+    public static void main(String[] args) {
+        String[] arr = {"刘备", "曹操", "吕布", "刘三刀", "刘封", "刘邦"};
+        Stream<String> stream1 = Stream.of(arr);
+        Stream<String> stream2 = stream1.limit(5).limit(4).limit(3);
+        stream2.forEach(str -> System.out.println(str));
+    }
+}
+```
+
+
+
+### skip
+
+如果希望跳过前几个元素，可以使用 `skip` 方法获取一个截取之后的新流。
+
+如果流的当前长度大于n，则跳过前n个；否则将会得到一个长度为0的空流。
+
+基本使用：
+
+```java
+public class demo {
+    public static void main(String[] args) {
+        String[] arr = {"刘备", "曹操", "吕布", "刘三刀", "刘封", "刘邦"};
+        Stream<String> stream1 = Stream.of(arr);
+        Stream<String> stream2 = stream1.skip(1).skip(2);
+        stream2.forEach(str -> System.out.println(str));
+    }
+}
+```
+
+
+
+## 终结方法
+
+终结方法：返回值类型不再是 `Stream` 接口自身类型的方法，因此不再支持类似 `StringBuilder` 那样的链式调用。本小节中，终结方法包括 `count()` 和 `forEach()` 方法。
+
+### forEach
+
+该方法接收一个 `Consumer` 接口函数，会将每一个流元素交给该函数进行处理。
+
+```java
+void forEach(Consumer<? super T> action);
+```
+
+
+
+基本使用：
+
+```java
+public class demo {
+    public static void main(String[] args) {
+        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
+        stream.forEach(integer -> System.out.println(integer + 1));
+    }
+}
+```
+
+
+
+### count
+
+与旧集合 `Collection` 当中的 `size` 方法一样，流提供 `count` 方法来数一数其中的元素个数
+
+该方法返回一个long值代表元素个数
+
+```java
+public class demo {
+    public static void main(String[] args) {
+        String[] arr = {"刘备", "曹操", "吕布", "刘三刀", "刘封", "刘邦"};
+        Stream<String> stream = Stream.of(arr);
+        long count = stream.count();
+        System.out.println(count);
+    }
+}
+```
+
+
+
+
+
+### concat
+
+如果有两个流，希望合并成为一个流，那么可以使用 `Stream` 接口的静态方法 `concat` ：
+
+```java
+static <T> Stream<T> concat(Stream<? extends T> a, Stream<? extends T> b)
+```
+
+> 这是一个静态方法，与 java.lang.String 当中的 concat 方法是不同的。
+
+
+
+基本使用：
+
+```java
+public class demo {
+    public static void main(String[] args) {
+        String[] arr1 = {"刘备", "曹操", "吕布"};
+        String[] arr2 = {"刘三刀", "刘封", "刘邦"};
+        Stream<String> stream1 = Stream.of(arr1);
+        Stream<String> stream2 = Stream.of(arr2);
+        Stream<String> stream3 = Stream.concat(stream1, stream2);
+        stream3.forEach(str -> System.out.println(str));
+    }
+}
+```
+
+
+
+### collect
+
+`collect()` 方法可以优雅的将一个对象的集合转化成另一个对象的集合
+
+`java.util.stream.Collectors` 
+
+```java
+<R, A> R collect(Collector<? super T, A, R> collector);
+```
+
+
+
+### reduce
+
+
+
+
+
+### orElse
+
+如果当前值存在则返回，否则返回other
+
+```java
+public T orElse(T other) {
+    return value != null ? value : other;
+}
+```
+
+
+
+
+
+
+
+# Stream Flow原理☕

@@ -8,36 +8,6 @@
 
 
 
-## 应用场景
-
-### 应用解耦
-
-系统的耦合性越高，容错性就越低。以电商应用为例，用户创建订单后，如果耦合调用库存系统、物流系统、支付系统，任何一个子系统出了故障或者因为升级等原因暂时不可用，都会造成下单操作异常，影响用户使用体验。
-
-<img src="http://store.secretcamp.cn/uPic/image-20210425104838414202104251048381619318918XjxbYmXjxbYm.png" alt="image-20210425104838414" style="zoom:50%;" />
-
-使用消息队列解耦合，系统的耦合性就会提高了。比如物流系统发生故障，需要几分钟才能来修复，在这段时间内，物流系统要处理的数据被缓存到消息队列中，用户的下单操作正常完成。当物流系统回复后，补充处理存在消息队列中的订单消息即可，终端系统感知不到物流系统发生过几分钟故障。
-
-<img src="http://store.secretcamp.cn/uPic/image-20210425104935000202104251049351619318975doWsFqdoWsFq.png" alt="image-20210425104935000" style="zoom:50%;" />
-
-
-
-### 流量削峰
-
-应用系统如果遇到系统请求流量的瞬间猛增，有可能会将系统压垮。有了消息队列可以将大量请求缓存起来，分散到很长一段时间处理，这样可以大大提到系统的稳定性和用户体验。
-
-<img src="http://store.secretcamp.cn/uPic/image-20210425105030319202104251050301619319030n17t1hn17t1h.png" alt="image-20210425105030319" style="zoom:50%;" />
-
-
-
-### 数据分发
-
-通过消息队列可以让数据在多个系统更加之间进行流通。数据的产生方不需要关心谁来使用数据，只需要将数据发送到消息队列，数据使用方直接在消息队列中直接获取数据即可。
-
-<img src="http://store.secretcamp.cn/uPic/image-20210425105202329202104251052021619319122lneWLClneWLC.png" alt="image-20210425105202329" style="zoom:50%;" />
-
-
-
 
 
 ## 基本概念
@@ -56,7 +26,7 @@ RocketMQ 主要由 Producer、Broker、Consumer 三部分组成，其中 Produce
 
 
 
-### 消息队列：Message Queue
+### 消息队列 Message Queue
 
 Message Queue 是用于存储消息的物理地址，用于并行发送和接收消息，相当于是 Topic 的分区，每个 Topic 中的消息地址存储于多个 Message Queue 中。
 
@@ -82,7 +52,7 @@ Message Queue 是用于存储消息的物理地址，用于并行发送和接收
 
 ### 消费者组 Consumer Group 
 
-同一类 Consumer 的集合，这类 Consumer 通常消费同一类消息且消费逻辑一致。消费者组使得在消息消费方面，实现集群和容错的目标变得非常容易。要注意的是，消费者组的消费者实例必须订阅完全相同的 Topic 。
+消费组是同一类 Consumer 的集合，这类 Consumer 通常消费同一类消息且消费逻辑一致。消费者组使得在消息消费方面，实现集群和容错的目标变得非常容易。要注意的是，**消费者组的消费者实例必须订阅完全相同的 Topic 。**
 
 RocketMQ 支持两种消息模式：集群消费（Clustering）和广播消费（Broadcasting）。
 
@@ -116,9 +86,9 @@ Broker Server 也存储消息相关的元数据，包括消费者组、消费进
 
 ### 名字服务 Name Server
 
-Name Server 充当路由消息的提供者。生产者或消费者能够通过 Name Server 查找各主题相应的 Broker IP列表。
+NameServer 充当路由消息的提供者，其角色类似 Dubbo 中的 Zookeeper。生产者或消费者能够通过 NameServer 查找各主题相应的 Broker IP 列表。
 
-多个 Name Server 实例组成集群，但相互独立，没有信息交换。
+多个 Name Server 实例组成集群，但相互独立，没有信息交换，Broker是向每一台 NameServer 注册自己的路由信息，所以每一个NameServer 实例上面都保存一份完整的路由信息。当某个 NameServer 因某种原因下线了，Broker 仍然可以向其它 NameServer同步其路由信息，Producer、Consumer 仍然可以动态感知 Broker 的路由的信息。
 
 
 
@@ -242,10 +212,21 @@ sh bin/mqshutdown broker
 
 消息有序指的是一类消息消费时，能按照发送的顺序来消费。例如：一个订单产生了三条消息分别是订单创建、订单付款、订单完成。消费时要按照这个顺序消费才能有意义，但是同时订单之间是可以并行消费的。RocketMQ 可以严格的保证消息有序。
 
-顺序消息分为全局顺序消息与分区顺序消息，全局顺序是指某个 Topic 下的所有消息都要保证顺序；部分顺序消息只要保证每一组消息被顺序消费即可。
+顺序消息分为全局顺序消息与分区顺序消息，全局顺序是指某个 Topic 下的所有消息都要保证顺序；分区顺序消息只要保证每一组消息被顺序消费即可。
 
-- 全局顺序对于指定的一个 Topic，所有消息按照严格的先入先出（FIFO）的顺序进行发布和消费。 适用场景：性能要求不高，所有的消息严格按照 FIFO 原则进行消息发布和消费的场景
-- 分区顺序对于指定的一个 Topic，所有消息根据 sharding key 进行区块分区。 同一个分区内的消息按照严格的 FIFO 顺序进行发布和消费。 Sharding key 是顺序消息中用来区分不同分区的关键字段，和普通消息的 Key 是完全不同的概念。 适用场景：性能要求高，以 sharding key 作为分区字段，在同一个区块中严格的按照 FIFO 原则进行消息发布和消费的场景。
+- 全局顺序对于指定的一个 Topic，所有消息按照严格的先入先出（FIFO）的顺序进行发布和消费。 如果是全局顺序，则代表该 Topic 下只有一个分片。
+
+  适用场景：性能要求不高，所有的消息严格按照 FIFO 原则进行消息发布和消费的场景
+
+  <img src="http://store.secretcamp.cn/uPic/image-20210825212230662202108252122301629897750IQxtlxIQxtlx.png" alt="image-20210825212230662" style="zoom:40%;" />
+
+  
+
+- 分区顺序对于指定的一个 Topic，所有消息根据 sharding key 进行区块分区。 同一个分区内的消息按照严格的 FIFO 顺序进行发布和消费。 Sharding key 是顺序消息中用来区分不同分区的关键字段，和普通消息的 Key 是完全不同的概念。 
+
+  适用场景：性能要求高，以 sharding key 作为分区字段，在同一个区块中严格的按照 FIFO 原则进行消息发布和消费的场景。
+
+  <img src="http://store.secretcamp.cn/uPic/image-20210825212300119202108252123001629897780BUJExDBUJExD.png" alt="image-20210825212300119" style="zoom:40%;" />
 
 
 
@@ -258,9 +239,13 @@ Consumer 消费消息失败通常可以认为有以下几种情况：
 - 由于消息本身的原因，例如反序列化失败，消息数据本身无法处理（例如话费充值，当前消息的手机号被注销，无法充值）等。这种错误通常需要跳过这条消息，再消费其它消息，而这条失败的消息即使立刻重试消费，99% 也不成功，所以最好提供一种定时重试机制，例如过 10 秒后再重试。
 - 由于依赖的下游应用服务不可用，例如 db 连接不可用，外系统网络不可达等。遇到这种错误，即使跳过当前失败的消息，消费其他消息同样也会报错。这种情况建议应用 sleep 30s，再消费下一条消息，这样可以减轻 Broker 重试消息的压力。
 
-RocketMQ会为每个消费组都设置一个Topic名称为 `%RETRY%+consumerGroup` 的重试队列，用于暂时保存因为各种异常而导致Consumer端无法消费的消息，这里需要注意的是，这个 Topic 的重试队列是针对消费组，而不是针对每个 Topic 设置的。
+RocketMQ 会为每个消费组都设置一个 Topic 名称为 `%RETRY%+consumerGroup` 的重试队列，用于暂时保存因为各种异常而导致Consumer 端无法消费的消息，这里需要注意的是，这个 Topic 的重试队列是针对消费组，而不是针对每个 Topic 设置的。
 
 考虑到异常恢复起来需要一些时间，会为重试队列设置多个重试级别，每个重试级别都有与之对应的重新投递延时，重试次数越多投递延时就越大。RocketMQ 对于重试消息的处理是先保存至 Topic 名称为 `SCHEDULE_TOPIC_XXXX` 的延迟队列中，后台定时任务按照对应的时间进行 Delay 后重新保存至 `%RETRY%+consumerGroup` 的重试队列中。
+
+```
+messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+```
 
 
 
@@ -268,7 +253,7 @@ RocketMQ会为每个消费组都设置一个Topic名称为 `%RETRY%+consumerGrou
 
 死信队列（Dead-Letter Queue）用于处理无法被正常消费的消息。当一条消息初次消费失败，消息队列会自动进行消息重试，达到最大重试次数后，若消费依然失败，则表明消费者在正常情况下无法正确地消费该消息，此时，消息队列 不会立刻将消息丢弃，而是将其发送到该消费者对应的特殊队列中。
 
-这种消息称为死信消息（Dead-Letter Message），在RocketMQ中，可以通过使用 console 控制台对死信队列中的消息进行重发来使得消费者实例再次进行消费。
+这种消息称为死信消息（Dead-Letter Message），在 RocketMQ 中，可以通过使用 console 控制台对死信队列中的消息进行重发来使得消费者实例再次进行消费。
 
 
 
@@ -276,11 +261,11 @@ RocketMQ会为每个消费组都设置一个Topic名称为 `%RETRY%+consumerGrou
 
 在互联网应用中，尤其在网络不稳定的情况下，消息队列 RocketMQ 的消息有可能会出现重复，有以下几种情况：
 
-- 发送时消息重复
+- 生产时消息重复
 
   当一条消息已被成功发送到服务端并完成持久化，此时出现了网络闪断或者客户端宕机，导致服务端对客户端应答失败。 如果此时生产者意识到消息发送失败并尝试再次发送消息，消费者后续会收到两条内容相同并且 Message ID 也相同的消息。
 
-- 投递时消息重复
+- 消费时消息重复
 
   消息消费的场景下，消息已投递到消费者并完成业务处理，当客户端给服务端反馈应答的时候网络闪断。为了保证消息至少被消费一次，消息队列 RocketMQ 的服务端将在网络恢复后再次尝试投递之前已被处理过的消息，消费者后续会收到两条内容相同并且 Message ID 也相同的消息。
 
@@ -309,91 +294,7 @@ consumer.subscribe("ons_test", "*", new MessageListener() {
 });
 ```
 
-
-
-# 消息持久化🚀
-
-RocketMQ 是一款高性能、高可靠的分布式消息中间件。
-
-通常高性能和高可靠是很难兼得的。因为要保证高可靠，那么数据就必须持久化到磁盘上，将数据持久化到磁盘，那么可能就不能保证高性能了，RocketMQ 在兼容这两方面做的十分不错。
-
-
-
-## 消息存储
-
-RocketMQ 是通过顺序写来保证消息的高效存储。
-
-顺序写速度可以达到 1500 MB/s，超过了一般网卡的传输速度。但是如果不进行人工干预，磁盘采用的是随机写，在随机写的情况下，磁盘的写入速度急速下降，磁盘的随机写速度可能只有几百 KB/s，这远远要慢于网络传输速度。
-
-RocketMQ 在持久化的设计上，采取的是消息顺序写、随机读的策略，利用磁盘顺序写的速度，让磁盘的写速度不会成为系统的瓶颈。
-
-
-
-## 消息发送
-
-将磁盘中的消息发送出去，要经过 4 次拷贝
-
-1. 从磁盘复制数据到内核态内存；
-2. 从内核态内存复制到用户态内存；
-3. 然后从用户态内存复制到网络驱动的内核态内存；
-4. 最后是从网络驱动的内核态内存复制到网卡中进行传输。
-
-零拷贝（Zero-copy）技术是指计算机执行操作时，CPU 不需要先将数据从某处内存复制到另一个特定区域。这种技术通常用于通过网络传输文件时节省 CPU 周期和内存带宽。
-
-Java中通过 `MappedByteBuffer` 实现了 "零拷贝"，即省去了上述第 2 步，直接将磁盘数据从内核态复制到网络驱动的内核态。
-
-RocketMQ 也充分利用了上述特性，提高消息存盘和网络发送的速度。
-
-
-
-## 消息存储结构
-
-RocketMQ 消息的存储是由 ConsumeQueue 和 CommitLog 配合完成的。
-
-在 RocketMQ 持久化机制中，涉及到了三个角色：
-
-- CommitLog：消息真正的存储文件，所有消息都存储在 CommitLog 文件中。
-- ConsumeQueue：消息消费逻辑队列，类似数据库的索引文件，存储的是指向物理存储的地址，每个 Topic 下的每个 Message Queue 都有一个对应的 ConsumeQueue 文件。
-- IndexFile：消息索引文件，主要存储消息 Key 与 offset 对应关系，提升消息检索速度。
-
-生产者将消息发送到 RocketMQ 的 Broker 后，Broker 服务器会将消息顺序写入到 CommitLog 文件中，磁盘顺序写特别快，RocketMQ 充分利用了这一点，极大的提高消息写入效率。
-
-但是消费者消费消息的时候，可能就会遇到麻烦，每一个消费者只能订阅一个主题，消费者关心的是订阅主题下的所有消息，但是同一主题的消息在 CommitLog 文件中可能是不连续的，那么消费者消费消息的时候，需要将 CommitLog 文件加载到内存中遍历查找订阅主题下的消息，频繁的 IO 操作，性能就会急速下降。
-
-为了解决这个问题，RocketMQ 引入了 ConsumeQueue 文件。ConsumeQueue 文件类似于 MySQL 索引文件，不会存储消息的全量信息，而是存放了同一主题下的所有消息的地址，消费者消费的时候只需要去对应的 ConsumeQueue 组中取消息即可。Consumequeue 文件，这样做可以带来以下两个好处：
-
-- ConsumeQueue 文件内容小，可以尽可能的保证 ConsumeQueue 文件全部读入到内存，提高消费效率。
-- ConsumeQueue 文件也是会持久化的，不存全量信息可以节约磁盘空间。
-
-<img src="http://store.secretcamp.cn/uPic/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC80LzgvMTcxNTkxOGYwMDcwY2E5NA202105262012341622031154M4xMddM4xMdd.png"  />
-
-## 刷盘机制
-
-RocketMQ 的消息是存储到磁盘上的，这样既能保证断电后恢复，又可以让存储的消息量超出内存的限制。
-
-RocketMQ 为了提高性能，会尽可能地保证磁盘的顺序写。消息在通过 Producer 写入 RocketMQ 的时候，有两种写磁盘方式，同步刷盘和异步刷盘。
-
-PageCache 是 OS 对文件的缓存，用于加速对文件的读写，所以一般都是先写入到 PageCache 中，然后再持久化到磁盘上。MySQL、Redis 等都是如此，RocketMQ 也不列外。
-
-
-
-### 同步刷盘
-
-在返回写成功状态时，消息已经被写入磁盘。具体流程是，消息写入内存的 PageCache 后，立刻通知刷盘线程刷盘， 然后等待刷盘完成，刷盘线程执行完成后唤醒等待的线程，返回消息写成功的状态。
-
-这种方式可以保证数据绝对安全，但是吞吐量不大。
-
-
-
-### 异步刷盘
-
-在返回写成功状态时，消息可能只是被写入了内存的 PageCache，写操作的返回快，吞吐量大；当内存里的消息量积累到一定程度时，统一触发写磁盘动作，快速写入。
-
-这种方式吞吐量大，性能高，但是 PageCache 中的数据可能丢失，不能保证数据绝对的安全。
-
-
-
-<img src="http://store.secretcamp.cn/uPic/image-20210526162437759202105261624381622017478jegfjVjegfjV.png" alt="image-20210526162437759" style="zoom:50%;" />
+也可以自定义唯一流转 handleId 放在消息体中，反序列化后再根据这个handleId 实现幂等。
 
 
 
@@ -407,9 +308,9 @@ NameServer是一个非常简单的 Topic 路由注册中心，其角色类似 Du
 
 主要包括两个功能：
 
-- Broker管理
+- Broker 管理
 
-  NameServer 接受 Broker 集群的注册信息并且保存下来作为路由信息的基本数据，然后提供心跳检测机制，检查 Broker 是否还存活
+  NameServer 接受 Broker 集群的注册信息并且保存下来作为路由信息的基本数据，然后提供心跳检测机制，检查 Broker 是否还存活。
 
 - 路由信息管理
 
@@ -419,7 +320,7 @@ NameServer是一个非常简单的 Topic 路由注册中心，其角色类似 Du
 
 ### BrokerServer
 
-Broker Server 主要负责消息的存储、投递和查询以及服务高可用保证
+Broker Server 主要负责消息的存储、投递和查询以及服务高可用保证。
 
 Broker 分为 Master 与 Slave，一个 Master 可以对应多个 Slave，但是一个 Slave 只能对应一个 Master，Master 与 Slave 的对应关系通过指定相同的 BrokerName，不同的 BrokerId 来定义，BrokerId 为 0 表示 Master，非 0 表示 Slave。
 
@@ -439,9 +340,9 @@ Producer 与 NameServer 集群中的其中一个节点（随机选择）建立�
 
 消息消费的角色，支持分布式集群方式部署。支持以 push、pull 两种模式对消息进行消费。同时也支持集群方式和广播方式的消费，它提供实时消息订阅机制，可以满足大多数用户的需求。
 
-Consumer 与 NameServer 集群中的其中一个节点（随机选择）建立长连接，定期从 NameServer 取 Topic 路由信息，并向提供 Topic 服务的 Master、Slave 建立长连接，且定时向 Master、Slave 发送心跳。Consumer 既可以从 Master 订阅消息，也可以从 Slave 订阅消息，订阅规则由 Broker 配置决定。
+Consumer 与 NameServer 集群中的其中一个节点（随机选择）建立长连接，定期从 NameServer 取 Topic 路由信息，并向提供 Topic 服务的 Master、Slave 建立长连接，且定时向 Master、Slave 发送心跳。
 
-
+Consumer 既可以从 Master 订阅消息，也可以从 Slave 订阅消息，Master服务器会根据拉取偏移量与最大偏移量的距离（防止重复消费），以及从服务器是否可读等因素建议下一次是从 Master 还是 Slave 拉取。
 
 
 
@@ -491,7 +392,9 @@ Master 角色的 Broker 支持读和写，Slave 角色的 Broker 仅支持读，
 
 ### 单主节点
 
-这种方式风险较大，一旦Broker重启或者宕机时，会导致整个服务不可用。不建议线上环境使用,可以用于本地测试。
+这种方式风险较大，一旦 Broker 重启或者宕机时，会导致整个服务不可用。不建议线上环境使用,可以用于本地测试。
+
+
 
 ### 多主节点
 
@@ -1081,6 +984,8 @@ public class FilterConsumer {
 
 上图说明了事务消息的大致方案，其中分为两个流程：正常事务消息的发送及提交、事务消息的补偿流程。
 
+
+
 #### 事务消息发送及提交
 
 1. 发送消息（half消息）。
@@ -1212,6 +1117,58 @@ Consumer 消费的一种类型，该模式下 Broker 收到数据后会主动推
 
 
 
+
+
+
+
+## 消费模式
+
+Consumer 端的两种消费模式（Push/Pull）都是基于 Pull 模式来获取消息的，而在 Push 模式只是对 Pull 模式的一种封装，其本质实现为消息拉取线程在从服务器拉取到一批消息后，然后提交到消息消费线程池后，又立刻向服务器再次尝试拉取消息。
+
+
+
+###  push模式
+
+如果要定义多个消费者，则要指定不同的 group。对于一个 group，同一个应用只能有一个消费者
+
+```java
+@Service
+@RocketMQMessageListener(topic = "spring-boot-rocketmq",
+        consumeMode = ConsumeMode.ORDERLY,
+        consumerGroup = "group1")
+public class DemoConsumer1 implements RocketMQListener<String> {
+    @Override
+    public void onMessage(String s) {
+        System.out.println("Consumer01接收到消息...");
+        System.out.println(s);
+    }
+}
+
+@Service
+@RocketMQMessageListener(topic = "spring-boot-rocketmq",
+        consumeMode = ConsumeMode.ORDERLY,
+        consumerGroup = "group2")
+public class DemoConsumer2 implements RocketMQListener<String> {
+    @Override
+    public void onMessage(String s) {
+        System.out.println("Consumer02接收到消息...");
+        System.out.println(s);
+    }
+}
+```
+
+
+
+
+
+### pull模式
+
+
+
+
+
+
+
 ## 集群模式
 
 消费者采用集群方式消费消息，多个消费者共同消费队列消息，每个消费者处理的消息不同
@@ -1268,6 +1225,221 @@ public class Consumer {
 ```
 
 
+
+## 消费者负载均衡
+
+Consumer 端负载均衡的核心设计理念是在一个消息消费队列在同一时间只允许被同一消费组内的一个消费者消费，一个消息消费者能同时消费多个消息队列。
+
+
+
+
+
+
+
+# 消息持久化🚀
+
+RocketMQ 是一款高性能、高可靠的分布式消息中间件。
+
+通常高性能和高可靠是很难兼得的。因为要保证高可靠，那么数据就必须持久化到磁盘上，将数据持久化到磁盘，那么可能就不能保证高性能了，RocketMQ 在兼容这两方面做的十分不错。
+
+
+
+## 消息存储「顺序写」
+
+RocketMQ 是通过顺序写来保证消息的高效存储。
+
+顺序写速度可以达到 1500 MB/s，超过了一般网卡的传输速度。但是如果不进行人工干预，磁盘采用的是随机写，在随机写的情况下，磁盘的写入速度急速下降，磁盘的随机写速度可能只有几百 KB/s，这远远要慢于网络传输速度。
+
+RocketMQ 在持久化的设计上，采取的是消息顺序写、随机读的策略，利用磁盘顺序写的速度，让磁盘的写速度不会成为系统的瓶颈。
+
+
+
+## 消息发送「零拷贝」
+
+将磁盘中的消息发送出去，要经过 4 次拷贝
+
+1. 从磁盘复制数据到内核态内存；
+2. 从内核态内存复制到用户态内存；
+3. 然后从用户态内存复制到网络驱动的内核态内存；
+4. 最后是从网络驱动的内核态内存复制到网卡中进行传输。
+
+零拷贝（Zero-copy）技术是指计算机执行操作时，CPU 不需要先将数据从某处内存复制到另一个特定区域。这种技术通常用于通过网络传输文件时节省 CPU 周期和内存带宽。
+
+RocketMQ 通过 `MappedByteBuffer` 对文件进行读写，利用了 NIO 中的 `FileChannel` 模型将磁盘上的物理文件直接映射到用户态的内存地址中，实现了 “零拷贝”，即省去了上述第 2 步，直接将磁盘数据从内核态复制到网络驱动的内核态。
+
+正因为需要使用 MMAP 内存映射机制，故 RocketMQ 的文件存储都使用定长结构来存储，方便一次将整个文件映射至内存。
+
+
+
+## 消息存储结构
+
+RocketMQ 消息的存储是由 ConsumeQueue 和 CommitLog 配合完成的。
+
+在 RocketMQ 持久化机制中，涉及到了三个角色：
+
+
+
+### CommitLog
+
+CommitLog 是消息真正的存储文件，所有消息都存储在 CommitLog 文件中。
+
+单个文件大小默认1G，文件名长度为 20 位，左边补零，剩余为起始偏移量，比如 00000000000000000000 代表了第一个文件，起始偏移量为 0，文件大小为 1G=1073741824 。当第一个文件写满了，第二个文件为 00000000001073741824 ，起始偏移量为1073741824 ，以此类推。
+
+
+
+### ConsumeQueue
+
+ConsumeQueue 是消息消费逻辑队列，类似数据库的索引文件，存储的是指向物理存储的地址，每个 Topic 下的每个 Message Queue 都有一个对应的 ConsumeQueue 文件。
+
+ConsumeQueue 作为消费消息的索引，保存了指定 Topic 下的队列消息在 CommitLog 中的起始物理偏移量 offset 、消息大小 size和消息 Tag 的 hashCode 。
+
+
+
+### IndexFile
+
+- IndexFile：消息索引文件，提供了一种可以通过 key 或时间区间来查询消息的方法。
+
+
+
+
+
+## 存储过程
+
+生产者将消息发送到 RocketMQ 的 Broker 后，Broker 服务器会将消息顺序写入到 CommitLog 文件中，磁盘顺序写特别快，RocketMQ 充分利用了这一点，极大的提高消息写入效率。
+
+但是消费者消费消息的时候，可能就会遇到麻烦，每一个消费者只能订阅一个 Topic ，消费者关心的是该 Topic 下的所有消息，但是同一主题的消息在 CommitLog 文件中可能是不连续的，那么消费者消费消息的时候，需要将 CommitLog 文件加载到内存中遍历查找订阅主题下的消息，频繁的 I/O 操作，性能就会急速下降。
+
+为了解决这个问题，RocketMQ 引入了 ConsumeQueue 文件。ConsumeQueue 文件类似于 MySQL 索引文件，不会存储消息的全量信息，而是存放了同一主题下的所有消息的地址，消费者消费的时候只需要去对应的 ConsumeQueue 组中取消息即可。Consumequeue 文件，这样做可以带来以下两个好处：
+
+- ConsumeQueue 文件内容小，可以尽可能的保证 ConsumeQueue 文件全部读入到内存，提高消费效率。
+- ConsumeQueue 文件也是会持久化的，不存全量信息可以节约磁盘空间。
+
+<img src="http://store.secretcamp.cn/uPic/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC80LzgvMTcxNTkxOGYwMDcwY2E5NA202105262012341622031154M4xMddM4xMdd.png"  />
+
+## 刷盘机制
+
+RocketMQ 的消息是存储到磁盘上的，这样既能保证断电后恢复，又可以让存储的消息量超出内存的限制。
+
+RocketMQ 为了提高性能，会尽可能地保证磁盘的顺序写。消息在通过 Producer 写入 RocketMQ 的时候，有两种写磁盘方式，同步刷盘和异步刷盘。
+
+PageCache 是 OS 对文件的缓存，用于加速对文件的读写，所以一般都是先写入到 PageCache 中，然后再持久化到磁盘上。MySQL、Redis 等都是如此，RocketMQ 也不列外。
+
+
+
+### 同步刷盘
+
+在返回写成功状态时，消息已经被写入磁盘。具体流程是，消息写入内存的 PageCache 后，立刻通知刷盘线程刷盘， 然后等待刷盘完成，刷盘线程执行完成后唤醒等待的线程，返回消息写成功的状态。
+
+这种方式可以保证数据绝对安全，但是吞吐量不大。
+
+
+
+### 异步刷盘
+
+在返回写成功状态时，消息可能只是被写入了内存的 PageCache（页缓存），写操作的返回快，吞吐量大；当内存里的消息量积累到一定程度时，统一触发写磁盘动作，快速写入。这种方式吞吐量大，性能高，但是 PageCache 中的数据可能丢失，不能保证数据绝对的安全。
+
+PageCache 是 OS 对文件的缓存，用于加速对文件的读写，程序对文件进行顺序读写的速度几乎接近于内存的读写速度，主要原因就是由于 OS 使用 PageCache 机制对读写访问操作进行了性能优化，将一部分的内存用作 PageCache 。
+
+- 对于数据的写入，OS 会先写入至 PageCache 内，随后通过异步的方式由 pdflush内核线程将缓存内的数据刷盘至物理磁盘上。
+
+- 对于数据的读取，如果一次读取文件时出现未命中 PageCache 的情况，OS 从物理磁盘上访问读取文件的同时，会顺序对其他相邻块的数据文件进行预读取。
+
+
+
+<img src="http://store.secretcamp.cn/uPic/image-20210526162437759202105261624381622017478jegfjVjegfjV.png" alt="image-20210526162437759" style="zoom:50%;" />
+
+
+
+
+
+
+
+# RocketMQ原理🚀
+
+## Topic
+
+对于RocketMQ ，一个 Topic 可以分布在各个 Broker 上，把一个 Topic 分布在一个 Broker 上的子集定义为一个 Topic 分片。
+
+每个Topic 分片还可以分为若干等分，其中的一份就是一个 ConsumerQueue，每一个 ConsumerQueue 代表了这个 Topic 的部分数据，每个 Topic 分片的 Queue 数量可以不同，由用户在创建 Topic 时指定。
+
+这样就可以做到每个 Topic 的数据都可以分布式存储在集群中的多台 Broker 上，形成了分布式的存储架构，这样就可以利用多台机器的资源来存储数据。
+
+同时，可以利用多台机器的资源来应对高并发的请求，因为对一个 Topic 的读写请求，就会均匀的落到多台 Broker 机器上去了。
+
+
+
+<img src="http://store.secretcamp.cn/uPic/image-20210825220340189202108252203401629900220cPOqJ3cPOqJ3.png" alt="image-20210825220340189" style="zoom: 33%;" />
+
+
+
+
+
+## Producer
+
+每个 Producer 采用发送给 Topic 的某个 MessageQueue
+
+主要有三类发送方式：
+
+1. 一种是直接发消息，Producer 内部有选择 Queue 的算法，不允许外界改变。
+2. 内置算法
+   - `SelectMessageQueueByRandom` ：纯随机
+   - `SelectMessageQueueByHash` ：纯取余
+   - `SelectMessageQueueByMachineRoom` ：没用
+3. 用户自定义算法
+
+<img src="http://store.secretcamp.cn/uPic/image-20210825222246886202108252222471629901367XIDZIJXIDZIJ.png" alt="image-20210825222246886" style="zoom:50%;" />
+
+
+
+
+
+## Consumer
+
+### 集群模式
+
+集群模式下每个消费者实例也会被平均分配到多个 MessageQueue ，这些 MessageQueue 可能位于不同的分片。
+
+如果要做到顺序消息，就必须把消息确保投递到同一个 MessageQueue 。
+
+<img src="http://store.secretcamp.cn/uPic/image-20210825222411842202108252224121629901452svmwJ8svmwJ8.png" alt="image-20210825222411842" style="zoom: 33%;" />
+
+
+
+例如，生产者可以对订单号做取模预算，有相同订单号 -> 有相同的模--->分发到相同的 MessageQueue
+
+<img src="http://store.secretcamp.cn/uPic/image-20210825223256729202108252232561629901976EFEeYWEFEeYW.png" alt="image-20210825223256729" style="zoom:43%;" />
+
+
+
+### 广播模式
+
+广播模式下，每个 Consumer 负责订阅的 Topic 下的所有 MessageQueue 。
+
+
+
+### Consumer的数量
+
+Consumer 的数量必须小于 MessageQueue 的个数，这是由 RocketMQ 的负载均衡算法决定的。
+
+- Queue > Consumer，且 Queue能整除 Consumer， 那么 Consumer 会平均分配 Queue
+- Queue > Consumer，且 Queue不能整除 Consumer， 那么会有一个Consumer多消费 1 个 Queue，其余 Consumer平均分配。
+- Queue < Consumer，那么会有 Consumer 闲置，就是浪费了，其余 Consumer 平均分配到 Queue上。
+
+
+
+
+
+## Broker
+
+RocketMQ 的消息的存储形式：ConsumeQueue + CommitLog
+
+- CommitLog：消息真正的物理存储文件，每台 Broker上的 CommitLog 被本机器所有 ConsumeQueue 共享。
+
+- ConsumeQueue：消息的逻辑队列，类似数据库的索引文件，存储的是指向物理存储的地址。每个 Topic 下的每个 MessageQueue 都有一个对应的 ConsumeQueue 文件。
+
+
+
+在 CommitLog 中，一个消息的存储长度是不固定的，RocketMQ 采取一些机制，尽量向 CommitLog 中顺序写，但是随机读，每次读取消息队列先读取 ConsumerQueue，然后再通过 ConsumerQueue 去 CommitLog 中拿到消息主体。
 
 
 
@@ -1431,39 +1603,87 @@ public class DemoConsumer implements RocketMQListener<MessageExt>{
 
 
 
-###  push模式
 
-如果要定义多个消费者，则要指定不同的 group。对于一个 group，同一个应用只能有一个消费者
 
-```java
-@Service
-@RocketMQMessageListener(topic = "spring-boot-rocketmq",
-        consumeMode = ConsumeMode.ORDERLY,
-        consumerGroup = "group1")
-public class DemoConsumer1 implements RocketMQListener<String> {
-    @Override
-    public void onMessage(String s) {
-        System.out.println("Consumer01接收到消息...");
-        System.out.println(s);
-    }
-}
+# FAQ🚀
 
-@Service
-@RocketMQMessageListener(topic = "spring-boot-rocketmq",
-        consumeMode = ConsumeMode.ORDERLY,
-        consumerGroup = "group2")
-public class DemoConsumer2 implements RocketMQListener<String> {
-    @Override
-    public void onMessage(String s) {
-        System.out.println("Consumer02接收到消息...");
-        System.out.println(s);
-    }
-}
-```
+## 怎么保证消息不丢失？
+
+消息可能丢失的场景：
+
+1. 生产阶段丢失
+
+   在生产阶段 Producer 将消息通过网络发送给 Broker ，当 Broker 收到消息后给 Producer 一个 ACK ，如果 Producer 没有收到正确的响应，Producer 直到收到 Broker 的确认响应后才会停止重试消息发送。
+
+2. 磁盘丢失
+
+   Broker收到来自Producer的消息，持久化到磁盘，如果是异步刷盘，消息一开始只被写入到内存的 PageCache ，消息量积累到一定程度时才会触发写磁盘动作，如果写入磁盘之前 Broker 挂了，可能会丢消息。
+
+   可以通过同步刷盘或异步刷盘 + 主从架构保证消息不丢失
+
+3. 消费阶段丢失
+
+   一定要当消费者处理完自身业务逻辑后给 Broker 发送消费确认，否则收到消息就给 Broker 确认消费，此时Broker认为消费者消费成功，将消息从Broker队列中移除，万一消费失败了，那消息就丢失了也没法重试。
 
 
 
 
 
-### pull模式
+## 消息积压怎么办？
+
+消息积压要么是生产者消息数量增加导致的积压，要么就是消费者消费变慢导致的消息积压，所以一旦出现消息积压的问题，要么是线上流量徒增，要么就是业务逻辑异常。
+
+- 生产端：检查业务逻辑是否有异常的耗时步骤导致的
+- Broker 端：检查消息队列内存使用情况、每个分区积压的消息数量差异，如果分区消息数量均匀，可以认为是流量激增，需要在消费端做优化，或者扩容（增加 Broker 节点）。如果分区消息数量差异很大，则要检查路由转发规则是否合理。
+
+- 消费端
+
+  一个 Comsumer 可以消费多个 MessageQueue ，Comsumer 数量固定时，可以增加 Broker 上的 MessageQueue 数量，加快消费速度。但是如果  Consumer 数量已经大于 MessageQueue 时，MessageQueue 数量不变，且仅增加消费者是没有用处的，因为多个消费者在同一个分区上实际是单线程资源竞争关系。
+
+
+
+
+
+## RocketMQ消息何时删除？
+
+
+
+
+
+
+
+## 消费失败怎么办？
+
+消费成功：更新消费者本地的 offsetStore ，即消费进度加一
+
+消费失败：消费失败的节点会回退给 Broker 节点，这些消息会进入 Retry Topic，每个消费者组都有一个专属的 Retry Topic， 即 `%Group%Retry Topic` ，消费者在启动时都会订阅这个 Topic。
+
+但是消费失败的消息，不会立刻进入 Retry Topic，因为立刻去消费还很有可能失败，这不是一个好的策略。
+
+RocketMQ 将 Retry Topic 和队列保存到消息属性中，修改消息的 Topic 为 `SCHEDULE_TOPIC_XXXX` ，XXXX 由消息重试的次数决定，重试次数越多，XXXX 越大，延时也就越高。
+
+再由 Broker 服务负责消费  `SCHEDULE_TOPIC_XXXX` 中的消息，如果消费的消息满足了延迟时间，就会成功消费消息，将这个消息的 Topic 改为 Retry Topic 。
+
+
+
+## RocketMQ读写分离？
+
+每次 Consumer 到 Broker 去拉消息，Broker 都会根据消息结果集中的最后一条消息，来推荐消费者下一次是到 Master 还是到 Slave 去拉取下一批消息。
+
+如果消息结果集最后一条消息是热数据，那么下ー次拉消息请求会到 Master，如果最后一条消息是冷数据，那下一次拉取消息就推荐到 Slave 
+
+- 热数据：消费者消费速度大于生产速度；
+- 冷数据：消费速度低于生产速度，消息堆积，距离 CommitLog 最大的 offset 大小超过系统内存的 40%
+
+
+
+
+
+
+
+## RocketMQ怎么实现顺序写？
+
+对于顺序写的 CommitLog 文件，Broker 会锁定它对应内存的映射空间，不允许它释放内存，同时在写之前会进行预热，避免出现缺页异常。
+
+被写满的 CommitLog 文件对应的内存映射缓冲区会解除锁定限制，允许换回外存，一般是使用 LRU，因为是顺序写，所以会退化成 FIFO，即最早的内存也会被先释放。
 

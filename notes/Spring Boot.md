@@ -392,7 +392,7 @@ public class HelloServiceProperties {
 
 
 
-### ConditionalOnClass
+### @ConditionalOnClass
 
 判断某个类是否存在于 classpath 中
 
@@ -404,7 +404,7 @@ public class HelloServiceProperties {
 
 
 
-### ConditionalOnSingleCandidate
+### @ConditionalOnSingleCandidate
 
 只有工厂类已经在容器中，且该工厂类只有单个产品实例时才会加载。
 
@@ -620,6 +620,12 @@ SpringBoot也可以从以下位置加载配置，优先级从高到低；高优�
 
 # 自动配置原理🍀
 
+## 核心思想
+
+SpringBoot 定义了一套接口规范，这套规范规定：SpringBoot 在启动时会扫描外部引用 jar 包中的`META-INF/spring.factories`文件，将文件中配置的类型信息加载到 Spring 容器，并执行类中定义的各种操作。对于外部 jar 来说，只需要按照 SpringBoot 定义的标准，就能将自己的功能装置进 SpringBoot。
+
+
+
 ## 依赖管理
 
 springboot 配置文件中的父项目是 `spring-boot-starter-parent`
@@ -744,7 +750,9 @@ public @interface SpringBootConfiguration {
 
 ### @EnableAutoConfiguration
 
-`@EnableAutoConfiguration` 是 `@AutoConfigurationPackage` 和 `@Import` 的合成
+`@EnableAutoConfiguration` 是实现自动装配的核心注解，它是 `@AutoConfigurationPackage` 和 `@Import` 的合成
+
+自动装配核心功能的实现实际是通过`@Import` 导入的 `AutoConfigurationImportSelector`类。
 
 ```java
 @Target({ElementType.TYPE})
@@ -785,7 +793,7 @@ public @interface AutoConfigurationPackage {
 
 `Registrar` 类中有一个 `registerBeanDefinitions()` 方法，该方法调用了 `register()` 方法，用于给容器批量注入组件。
 
-metadata 表示被注解类的元信息，而这个被注解类就是主程序类 `DemoApplication.class` ，这里通过 metadata  获取了`DemoApplication.class` 所在包的包名并传入 `register()` 方法，即将 `DemoApplication.class` （启动类）所在包下的所有组件注册到容器之中。
+metadata 表示被注解类的元信息，而这个被注解类就是主程序类 `DemoApplication.class` ，这里通过 metadata  获取了`DemoApplication.class` 所在包的包名并传入 `register()` 方法，即将 `DemoApplication.class` （启动类）所在包下的所有组件注册到容器之中，即将用户程序代码中自定义的组件注入容器。
 
 ```java
 public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
@@ -795,9 +803,9 @@ public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionR
 
 
 
-#### @Import({AutoConfigurationImportSelector.class})
+#### AutoConfigurationImportSelector
 
-`AutoConfigurationImportSelector` 中有一个 `selectImports()` 方法，用于向容器中注册一批组件。
+`AutoConfigurationImportSelector` 中有一个 `selectImports()` 方法，该方法主要用于获取所有符合条件的类的全限定类名，将这些类被加载到 IOC 容器中。
 
 该方法中的主要逻辑在于 `getAutoConfigurationEntry()` 方法，方法的值最终被转为 String[] 返回
 
@@ -818,10 +826,12 @@ public String[] selectImports(AnnotationMetadata annotationMetadata) {
 
 ```java
 protected AutoConfigurationImportSelector.AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
+    // 1. 判断自动状态有没有打开，可在application.properties中配置
     if (!this.isEnabled(annotationMetadata)) {
         return EMPTY_ENTRY;
     } else {
         AnnotationAttributes attributes = this.getAttributes(annotationMetadata);
+        // 获取候选配置
         List<String> configurations = this.getCandidateConfigurations(annotationMetadata, attributes);
         configurations = this.removeDuplicates(configurations);
         Set<String> exclusions = this.getExclusions(annotationMetadata, attributes);
@@ -834,6 +844,8 @@ protected AutoConfigurationImportSelector.AutoConfigurationEntry getAutoConfigur
 }
 ```
 
+
+
 `getCandidateConfigurations()` 方法的核心在于 `loadFactoryNames()` 方法 
 
 ```java
@@ -843,6 +855,8 @@ protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, A
     return configurations;
 }
 ```
+
+
 
 `loadFactoryNames()` 方法的核心在于 `loadSpringFactories()` 方法
 
@@ -868,7 +882,7 @@ Enumeration urls = classLoader.getResources("META-INF/spring.factories");
 
 
 
-例如 `spring-boot-autoconfigure-2.4.5.jar` 中，就存在 `META-INF/spring.factories` 文件，Springboot 就是读取了这些文件中的配置信息，在该配置文件中所有写明的类，都是即将被导入 ioc 容器的候选类。
+例如 `spring-boot-autoconfigure-2.4.5.jar` 中，就存在 `META-INF/spring.factories` 文件，Springboot 就是读取了这些文件中的配置信息，在该配置文件中所有写明的自动配置类，都是即将被导入 IOC 容器的候选类。
 
 需要注意的是，不是每个包都有 `META-INF/spring.factories` 文件
 
@@ -879,6 +893,8 @@ Enumeration urls = classLoader.getResources("META-INF/spring.factories");
 
 
 ### @ComponentScan
+
+
 
 
 
@@ -1012,7 +1028,7 @@ public class DispatcherServletAutoConfiguration {
 
 👉 [官方文档](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-spring-mvc-static-content)
 
-SpringBoot对静态资源的自动配置在 `Webmvcautoconfiquration` 类中
+SpringBoot 对静态资源的自动配置在 `Webmvcautoconfiquration` 类中
 
 寻找静态资源时，会从以下路径查找
 

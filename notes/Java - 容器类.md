@@ -48,6 +48,8 @@
 
 `Collection` 虽然可以存储各种对象，但实际上通常 `Collection` 只存储同一类型对象，例如都是存储 `String` 对象。因此在 *JDK 1.5* 之后，新增了 泛型（Generic） 语法，在设计 API 时可以指定类或方法支持泛型，这样使用 API 的时候也变得更为简洁，并可以得到编译时期的语法检查。
 
+泛型的本质是参数化类型，也就是说所操作的数据类型被指定为一个参数。
+
 
 
 ## 泛型的使用
@@ -161,11 +163,15 @@ public static void getElement2(Collection<? super Number> coll){}
 
 ## 类型擦除
 
+Java 的泛型是伪泛型，这是因为 Java 在编译期间，所有的泛型信息都会被擦掉，这也就是通常所说 “类型擦除” 。
+
+Java 的泛型是在编译器这个层次上实现的，在生成的字节码中是不包含泛型中的类型信息的，使用泛型的时候加上类型参数，在编译器编译的时候会去掉，这个过程成为类型擦除。
+
+例如，在代码中定义 `List<String>` 等类型，在编译后都会变成 `List` ，JVM 看到的只是 `List` ，而由泛型附加的类型信息对 JVM是 看不到的。
+
 
 
 # List☕
-
-## 概念
 
 `List` 作为 `Collection` 集合的子接口，不但继承了 `Collection` 接口中的全部方法，而且还增加了一些根据元素索引来操作集合的特有方法，如下：
 
@@ -185,6 +191,8 @@ public static void getElement2(Collection<? super Number> coll){}
 `java.util.ArrayList` 数据存储的结构是数组结构。
 
 特点：查询效率高，增删效率低，线程不安全。
+
+不支持并发读写，内部使用变量 `modCount` 记录操作数，并发下 `modCount` 对不上会抛出 `ConcurrentModificationException`
 
 
 
@@ -207,47 +215,53 @@ public boolean add(E e) {
 
 
 
-- `calculateCapacity(elementData, minCapacity)` ：确定执行 `add` 操作后所需要的具体容积
+`calculateCapacity(elementData, minCapacity)` ：确定执行 `add` 操作后所需要的具体容积
 
-  ```java
-  private static int calculateCapacity(Object[] elementData, int minCapacity) {
-    	// 如果elementData为空，则扩容后的值为DEFAULT_CAPACITY，即首次扩容的容积为10
-      if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
-          return Math.max(DEFAULT_CAPACITY, minCapacity);
-      }
-      return minCapacity;
-  }
-  ```
+```java
+private static int calculateCapacity(Object[] elementData, int minCapacity) {
+  	// 如果elementData为空，则扩容后的值为DEFAULT_CAPACITY，即首次扩容的容积为10
+    if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
+        return Math.max(DEFAULT_CAPACITY, minCapacity);
+    }
+    return minCapacity;
+}
+```
 
-  
 
-- `ensureExplicitCapacity`：执行扩容
 
-  ```java
-  private void ensureExplicitCapacity(int minCapacity) {
-      modCount++;
-  
-      // 如果所需空间大于目前数组长度，则需要扩容
-      if (minCapacity - elementData.length > 0)
-          grow(minCapacity);
-  }
-  ```
+`ensureExplicitCapacity`：执行扩容
 
-- `grow`：具体的扩容操作
+```java
+private void ensureExplicitCapacity(int minCapacity) {
+    modCount++;
 
-  ```java
-  private void grow(int minCapacity) {
-      int oldCapacity = elementData.length;
-      int newCapacity = oldCapacity + (oldCapacity >> 1);
-      if (newCapacity - minCapacity < 0)
-          newCapacity = minCapacity;
-    	// 一般用不上
-      if (newCapacity - MAX_ARRAY_SIZE > 0)
-          newCapacity = hugeCapacity(minCapacity);
-      // 进行数组拷贝操作，扩容的原理是 Arrays.copyOf 方法
-      elementData = Arrays.copyOf(elementData, newCapacity);
-  }
-  ```
+    // 如果所需空间大于目前数组长度，则需要扩容
+    if (minCapacity - elementData.length > 0)
+        grow(minCapacity);
+}
+```
+
+
+
+#### grow
+
+`grow`：具体的扩容操作
+
+```java
+private void grow(int minCapacity) {
+    int oldCapacity = elementData.length;
+    int newCapacity = oldCapacity + (oldCapacity >> 1);
+    if (newCapacity - minCapacity < 0)
+        newCapacity = minCapacity;
+  	// 一般用不上
+    if (newCapacity - MAX_ARRAY_SIZE > 0)
+        newCapacity = hugeCapacity(minCapacity);
+    // 进行数组拷贝操作，扩容的原理是 Arrays.copyOf 方法
+    elementData = Arrays.copyOf(elementData, newCapacity);
+}
+```
+
+
 
 
 
@@ -259,23 +273,25 @@ public boolean add(E e) {
 
 ## LinkedList
 
+
+
+### 设计思想
+
 ```java
 public class LinkedList<E>
     extends AbstractSequentialList<E>
     implements List<E>, Deque<E>, Cloneable, java.io.Serializable
 ```
 
-
-
-### 设计思想
-
-`java.util.LinkedList` 数据存储的结构是链表结构，底层用 双向链表 实现存储。
+`java.util.LinkedList` 数据存储的结构是链表结构，底层用双向链表实现存储。
 
 特点：查询效率低，增删效率高，线程不安全。
 
+<img src="http://store.secretcamp.cn/uPic/image-20210908144718274202109081447181631083638EawakqEawakq.png" alt="image-20210908144718274" style="zoom:50%;" />
+
 双向链表也叫双链表，是链表的一种，它的每个数据节点中都有两个指针，分别指向前一个节点和后一个节点。
 
-LinkedList 提供了大量首尾操作的方法：
+`LinkedList` 提供了大量首尾操作的方法：
 
 * `public void addFirst(E e)`:将指定元素插入此列表的开头。
 * `public void addLast(E e)`:将指定元素添加到此列表的结尾。
@@ -299,13 +315,50 @@ LinkedList 提供了大量首尾操作的方法：
 
 ### 设计思想
 
-`Vector` 底层是用数组实现的 `List`，相关的方法都加了同步检查，因此 "线程安全，效率低" 。
+`Vector` 底层是用数组实现的 `List`，相关的方法都加了同步检查，因此 “线程安全，效率低”。
 
-例如，`indexOf` 方法就增加了 `synchronized` 同步标记。
+例如，indexOf 方法通过 *synchronized* 修饰。
 
 
 
 ### 源码分析
+
+和 `ArrayList` 基本一样
+
+
+
+## CopyOnWriteArrayList
+
+### 设计思想
+
+设计思想的核心是读写分离，即写操作在一个复制的数组上进行，读操作还是在原始数组中进行，读写分离，互不影响。
+
+写操作需要加锁，防止并发写入时导致写入数据丢失。写操作结束之后需要把原始数组指向新的复制数组。
+
+
+
+`CopyOnWriteArrayList` 在写操作的同时允许读操作，大大提高了读操作的性能，因此很适合读多写少的应用场景，但也有一些缺点：
+
+1. 内存占用：在写操作时需要复制一个新的数组，使得内存占用为原来的两倍左右；
+2. 数据不一致：读操作不能读取实时性的数据，因为部分写操作的数据还未同步到读数组中。
+
+
+
+### 源码分析
+
+
+
+
+
+### FAQ
+
+#### 为什么没有ConcurrentArrayList？
+
+很难去开发一个通用并且没有 “并发瓶颈” 的线程安全的 List，`ConcurrentHashMap` 的价值不并不在于并发安全，而是保证并发安全的同时不存在并发瓶颈。
+
+对于 List 结构，很难去规避并发瓶颈，例如 `contains()` 操作，很难去避免锁整个 List 
+
+`CopyOnWriteArrayList` 规避了读操作并发的瓶颈，但是写操作仍存在并发瓶颈。
 
 
 
@@ -424,8 +477,6 @@ public class demo_LinkedHashSet {
 
 # Queue☕
 
-## 抽象方法
-
 ```java
 public interface Queue<E> extends Collection<E> {
 		// 抛出异常
@@ -449,11 +500,11 @@ public interface Queue<E> extends Collection<E> {
 
 ```
 
-<img src="http://store.secretcamp.cn/uPic/image-20210713232111729202107132321121626189672tczJTdtczJTd.png" alt="image-20210713232111729" style="zoom:50%;" />
 
 
 
-## Deque
+
+## Deque（Interface）
 
 双端队列 `Deque` 继承自 `Queue` ，该接口中不仅定义了双端队列相关的方法，也定义了栈相关的方法
 
@@ -467,17 +518,23 @@ public interface Deque<E> extends Queue<E> {
 
 
 
+
+
+
+
+## BlockingQueue（Interface）
+
+`BlockingQueue` 是 `java.util.concurrent` 包中定义的一个阻塞队列的接口，相对于 `Queue` 而言多了几个抽象方法。
+
+
+
+
+
 ## PriorityQueue
 
 Java 中的 `PriorityQueue` 通过二叉小顶堆实现，可以用一棵完全二叉树表示。
 
 <img src="http://store.secretcamp.cn/uPic/image-202107132328351802021071323283516261901155plvBB5plvBB.png" alt="image-20210713232835180" style="zoom:50%;" />
-
-
-
-## BlockingQueue
-
-`BlockingQueue` 是 `java.util.concurrent` 包中定义的一个阻塞队列的接口
 
 
 
@@ -490,10 +547,6 @@ Java 中的 `PriorityQueue` 通过二叉小顶堆实现，可以用一棵完全�
 `java.util.Map ` 接口用来存放 "键值对" 关系的对象，Map类中存储的 "键值对" 通过键来标识，所以 "键对象" 不能重复。
 
 Map 接口的实现类有 `HashMap`、`TreeMap`、`HashTable`、`Properties ` 等。
-
-
-
-## Map接口
 
 `Map` 接口中定义了很多方法，常用的如下：
 
@@ -512,15 +565,13 @@ Map 接口的实现类有 `HashMap`、`TreeMap`、`HashTable`、`Properties ` �
 
 ### 设计思想
 
-Map<K,V> 是一种以键值对存储数据的容器，而 `HashMap` 则是借助了键值 Key 的 hashcode 值来组织存储，使得可以非常快速和高效地地根据键值 key 进行数据的存取。
+`Map<K,V>` 是一种以键值对存储数据的容器，而 `HashMap` 则是借助了键值 Key 的 hashcode 值来组织存储结构，使得可以非常快速和高效地地根据键值 key 进行数据的存取。
 
 对于键值对 <key,value>，`HashMap` 内部会将其封装成一个对应的节点对象，即 `Node<key,value>` 
 
 对于每个对象，JVM 都会为其生成一个 hashcode 值。`HashMap` 在存储键值对 `Node<Key,Value>` 的时候，会根据 Key 的hashcode 值，以某种映射关系，决定应当将这对键值对 `Node<Key,Value>` 存储在 `HashMap` 中的什么位置上；
 
 当通过 Key 值取数据的时候，然后根据 Key 值的hashcode，以及内部映射条件，直接定位到 Key 对应的 Value 值存放在什么位置，可以非常高效地将 Value 值取出。
-
-<img src="../../Library/Application%20Support/typora-user-images/image-20210427105527058.png" alt="image-20210427105527058" style="zoom: 33%;" />
 
 
 
@@ -650,11 +701,11 @@ if ((tab = table) == null || (n = tab.length) == 0)
 
 如果桶位不为空（发生散列冲突）：
 
-- 桶位中的第一个元素和待添加元素一致，则标记 "替换"
-- 桶位中的第一个元素和待添加元素不一致，则沿着链表寻找，如果知道链表末尾还没有发现相同 key 的元素，则向位桶中添加新元素，如果发现了，则标记 "替换"
+- 桶位中的第一个元素和待添加元素一致，则标记 “替换”
+- 桶位中的第一个元素和待添加元素不一致，则沿着链表寻找，如果知道链表末尾还没有发现相同 key 的元素，则向位桶中添加新元素，如果发现了，则标记 “替换”
 - 桶位中的第一个元素是一个树节点，则调用 `putTreeVal()` ， 使用红黑树添加元素的逻辑
 
-下一步，如果存在标记了为 "替换" 的情况，则执行替换操作，本次 `put` 操作没有加入新元素，仅仅替换了同 key 的数据项
+下一步，如果存在标记了为 “替换” 的情况，则执行替换操作，本次 `put` 操作没有加入新元素，仅仅替换了同 key 的数据项
 
 最后，如果散列表中元素个数超过了阈值，则执行 `resize` 
 
@@ -851,7 +902,7 @@ for (int j = 0; j < oldCap; ++j) {
 
 
 
-### 扩展问题
+### FAQ
 
 #### 为什么数组长度总是二的次方数？
 
@@ -935,7 +986,7 @@ void transfer(Entry[] newTable, boolean rehash) {
 
 
 
-在 *JDK 1.7* 的实现中，链表数据迁移使用的是头插法，例如下方链表的长度为 4，先将 a 迁移到新位置，再将 b 迁移到新位置，此时 b.next = a ，以此类推。
+在 *JDK 1.7* 的实现中，链表数据迁移使用的是头插法，例如下方链表的长度为 3，先将 a 迁移到新位置，再将 b 迁移到新位置，此时 b.next = a ，以此类推。
 
 ```
 迁移前 oldTable
@@ -945,10 +996,7 @@ void transfer(Entry[] newTable, boolean rehash) {
 
 迁移后 newTable
 |
-|
-|
 | c -> b -> a
-|
 |
 ```
 
@@ -1020,6 +1068,26 @@ if (hiTail != null) {
 
 
 
+#### 哪些数据应该被迁移到高位？
+
+根据 `hash & oldCapacity ?= 0 ` 计算哪些数据项应该被移至高位位桶中
+
+`oldCapacity` 是二的次方数，假设是 16 即 10000 ，那么则要看当前节点 hash 值的第五位是否为 0
+
+如果该位为0，则计算结果为 0，该数据项仍保留在低位，如果为 1，计算结果不为 0，将该数据项移至高位，总体来说效果是随机的
+
+
+
+#### 线程不安全的原因
+
+- 死循环 & 数据丢失：JDK1.7 中扩容时的头插法导致，JDK1.8 不存在该问题
+
+- 数据覆盖
+
+  1. 假设两个线程 A、B 都在进行 put 操作，并且 hash 函数计算出的插入下标是相同的，当线程 A 执行完第六行代码后由于时间片耗尽导致被挂起，而线程 B 得到时间片后在该下标处插入了元素，成了正常的插入。
+
+  2. 然后线程 A 获得时间片，由于之前已经进行了 hash 碰撞的判断，所有此时不会再进行判断，而是直接进行插入，这就导致了线程 B 插入的数据被线程 A 覆盖了，从而线程不安全。
+
 
 
 ## HashTable🐚
@@ -1064,7 +1132,7 @@ public synchronized V put(K key, V value) {
 
 ### 设计思想
 
-`LinkedHashMap` 是链表和哈希表组合的一个数据存储结构，将所有 `Entry` 节点链入一个双向链表保证了迭代顺序，该迭代顺序可以是插入顺序，也可以是访问顺序。
+`LinkedHashMap` 是链表和哈希表组合的一个数据存储结构，将所有 `Entry` 节点链入一个双向链表保证了迭代顺序，该迭代顺序可以是插入顺序，也可以是访问顺序（LRU）。
 
 `HashMap` 和双向链表的密切配合和分工合作造就了 `LinkedHashMap` ，在下图中，如果去掉红色虚线，那么就是一个 `HashMap` ，用红色虚线串起来则形成了双向链表。
 
@@ -1076,13 +1144,13 @@ next 指针保持了数组对各个桶位的 `Entry` 的引用，before 和 afte
 
 ### 源码分析
 
+#### 构造函数
+
 ```java
 // accessOrder = false  按照插入顺序 
 // accessOrder = true  按照访问顺序
 
-public LinkedHashMap(int initialCapacity,
-                     float loadFactor,
-                     boolean accessOrder) {
+public LinkedHashMap(int initialCapacity, float loadFactor, boolean accessOrder) {
     super(initialCapacity, loadFactor);
     this.accessOrder = accessOrder;
 }
@@ -1104,7 +1172,7 @@ private transient Entry<K,V> header;  // 双向链表的表头元素
  *
  * @serial
  */
-private final boolean accessOrder;  //true表示按照访问顺序迭代，false时表示按照插入顺序 
+private final boolean accessOrder;  // true表示按照访问顺序迭代，false时表示按照插入顺序 
 ```
 
 
@@ -1127,6 +1195,10 @@ private static class Entry<K,V> extends HashMap.Entry<K,V> {
     ...
 }
 ```
+
+
+
+
 
 
 
@@ -1295,11 +1367,9 @@ Doug lea 对扩容部分进行了优化，原本在一个线程扩容的时候�
 
 #### 基本结构
 
-`ConcurrentHashMap` 是由 `Segment` 数组结构和 `HashEntry` 数组结构组成。`Segment` 是一种可重入锁，在 `ConcurrentHashMap` 里扮演锁的角色，`HashEntry` 则用于存储键值对数据。
+`ConcurrentHashMap` 是由 `Segment` 数组结构和 `HashEntry` 数组结构组成，`ConcurrentHashMap` 本质上是一个 `Segment` 数组，`Segment` 的结构和 `HashMap` 类似，是一种数组和链表结构。
 
-`ConcurrentHashMap` 本质上是一个 `Segment` 数组，`Segment` 的结构和 `HashMap` 类似，是一种数组和链表结构。
-
-一个 `Segment` 里包含一个 `HashEntry` 数组，每个 `HashEntry` 是一个链表结构的元素，每个 `Segment` 守护着一个 `HashEntry` 数组里的元素，当对 `HashEntry` 数组的数据进行修改时， 必须首先获得与它对应的 `Segment` 锁。
+`Segment` 是一种可重入锁，在 `ConcurrentHashMap` 里扮演锁的角色。
 
 ```java
 static class Segment<K,V> extends ReentrantLock implements Serializable {
@@ -1308,6 +1378,16 @@ static class Segment<K,V> extends ReentrantLock implements Serializable {
     Segment(float lf) { this.loadFactor = lf; }
 }
 ```
+
+
+
+一个 `Segment` 里包含一个 `HashEntry` 数组，每个 `HashEntry` 是一个链表结构的元素，每个 `Segment` 守护着一个 `HashEntry` 数组里的元素。`HashEntry` 则用于存储键值对数据，当对 `HashEntry` 数组的数据进行修改时， 必须首先获得与它对应的 `Segment` 锁。
+
+![image-20210824193439814](http://store.secretcamp.cn/uPic/image-20210824193439814202108241934401629804880z2zingz2zing.png)
+
+
+
+`Segment` 的个数一旦初始化就不能改变，默认 `Segment` 的个数是 16 个，可以认为 `ConcurrentHashMap` 默认支持最多 16 个线程并发。
 
 
 
@@ -1335,6 +1415,8 @@ volatile V value;
 
 
 #### put
+
+
 
 
 
@@ -1489,16 +1571,16 @@ static final int spread(int h) {
 
 `putVal()` 操作大致可分为以下几个步骤：
 
-1. 计算 key 的 hash 值，即调用 `speed()` 方法计算 hash 值；
+1. 计算 key 的 hash 值，根据 hashCode 即调用 `speed()` 方法计算再散列的 hash 值；
 
 2. 获取 hash 值对应的 Node 节点位置，此时通过一个循环实现。有以下几种情况：
 
    - table 为空，则首先进行初始化操作，初始化之后再次进入循环获取 Node 节点的位置；
-   - table 不为空，但没有找到 key 对应的 Node 节点，则直接调用 `casTabAt()` 方法插入一个新节点，此时使用了 CAS 操作，不用加锁，失败则通过自旋保证成功；
+   - table 不为空，但对应桶位为空，则直接调用 `casTabAt()` 方法插入一个新节点，此时使用了 CAS 操作，不用加锁，失败则通过自旋保证成功；
 
-   - table 不为空，且 key 对应的 Node 节点也不为空，但 Node 头结点的 hash 值为 `MOVED`（-1） ，则表示需要扩容，此时调用 `helpTransfer()` 方法协助扩容；
+   - table 不为空，且 key 对应的 Node 节点也不为空，但 Node 头结点的 hash 值为 `MOVED -1` ，表示这是一个 `ForwardingNode` ， 该桶位正在扩容，此时调用 `helpTransfer()` 方法协助扩容；
 
-   - table 不为空的其他情况下，则直接向 Node 中插入一个新 Node 节点，此时需要对这个 Node 链表或红黑树通过 `synchronized` 加锁。
+   - table 不为空的其他情况下（对应桶位不为空），则直接向桶位中插入一个新 Node 节点，此时需要对这个 Node 链表或红黑树通过 `synchronized` 加锁。
 
 3. 插入元素后，判断对应的 Node 结构是否需要改变结构，如果 bitCount 大于等于 TREEIFY_THRESHOLD，需要则调用 `treeifyBin()` 方法将 Node 链表升级为红黑树；
 
@@ -1516,7 +1598,7 @@ final V putVal(K key, V value, boolean onlyIfAbsent) {
         // 如果尚未初始化，则进行初始化操作
         if (tab == null || (n = tab.length) == 0)
             tab = initTable();
-        // 如果桶位为空
+        // 如果桶位为空 通过CAS添加头节点
         else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
             if (casTabAt(tab, i, null,
                     new Node<K,V>(hash, key, value, null)))
@@ -1664,6 +1746,8 @@ final Node<K,V>[] helpTransfer(Node<K,V>[] tab, Node<K,V> f) {
 
 #### size
 
+size 的实现方法和 `LongAdder` 的实现完全相同。
+
 首先在添加和删除元素时，会通过 CAS 操作更新 `ConcurrentHashMap` 的 `baseCount` 属性来统计元素个数。但是 CAS 操作可能会失败，因此，`ConcurrentHashMap` 又定义了一个 `CounterCell` 数组来记录 CAS 操作失败时的元素个数。
 
 因此，`ConcurrentHashMap` 中元素的个数为： *baseCount + sum(CounterCell[])*
@@ -1711,7 +1795,7 @@ public long mappingCount() {
 
 hash 字段的值都是大于等于 0 的，因为小于 0 有特殊含义。
 
-`ForwardingNode` 节点的 hash 值为 -1红黑树代理节点 `TreeBin` 的 hash值为 -2
+`ForwardingNode` 节点的 hash 值为 -1 ，红黑树代理节点 `TreeBin` 的 hash值为 -2
 
 
 
@@ -1741,9 +1825,13 @@ hash 字段的值都是大于等于 0 的，因为小于 0 有特殊含义。
 
 
 
-#### 扩容期间正在迁移桶位可以插入数据吗？
+#### put操作遇到ForwardingNode可以插入数据吗？
 
-不可以，正在迁移的桶位的头节点是 `ForwardingNode` ，当前线程会调用 `helpTransfer()`  方法协助扩容，完成扩容之后  `helpTransfer()`  返回扩容后的新数组 nextTable，然后方法会回到 `putVal()` 方法中的 for 循环，尝试进行插入操作。
+分情况讨论，桶位的头节点是 `ForwardingNode` 表示当前桶位正在迁移或者迁移完成，此时会去检查。
+
+如果桶位正在迁移，当前线程会调用 `helpTransfer()`  方法协助扩容，完成扩容之后  `helpTransfer()`  返回扩容后的新数组 nextTable，然后方法会回到 `putVal()` 方法中的 for 循环，尝试进行插入操作。
+
+如果桶位已经迁移完成了，那么 `ForwardingNode` 会指向迁移后的新数组，直接到新数组去执行 put 操作就可以。
 
 
 
@@ -1755,28 +1843,72 @@ hash 字段的值都是大于等于 0 的，因为小于 0 有特殊含义。
 
 
 
+
+
+#### 为什么key不能为null？
+
+`HashMap` 的 key 可以为 null，但 `ConcurrentHashMap` 不可以
+
+1. 源码层面不支持，存在非空约束
+2. 如果允许 key 为 null，并发环境下会带来二义性
+
+
+
+#### 为什么有的CAS，有的用synchronized？
+
+ `ConcurrentHashMap`  执行 put 操作时，如果桶位为空，则使用 CAS ，如果不为空，则使用 synchronized 。
+
+获取锁竞争过高时，重量级锁相对来说更好一些，因为可以避免过多无用自旋导致的 CPU 使用率增高。
+
+put 头节点是一个轻量级的操作，用 CAS 即可，但是 put 中间节点时需要先遍历、再替换等一系列操作，如果使用 CAS，并发量大会导致 CPU 空转，而 synchronized 可以让没获得锁的线程阻塞，不会浪费 CPU 性能 。
+
+
+
 ## ConcurrentSkipListMap🐚
 
 ### 跳跃表总体结构
 
 原则：
 
-1. 最底层的数据节点按照关键字升序排列
-
-2. 包含多索引，每个级别的索引节点按照其关联数据节点的关键字升序排列。
-3. 高级别索引是其低级别索引的子集
-
-4. 如果关键字 key 在级別 level=i 的索引中出现，则级别 level <=i 的所有索引中都包含 key
+- 最低层的链表维护了跳表内所有的元素，每上面一层链表都是下面一层的子集。
+- 跳表内的所有链表的元素都是排序的，查找时，可以从顶级链表开始找。一旦发现被查找的元素大于当前链表中的取值，就会转入下一层链表继续找。
 
 
 
-查找数据：
+<img src="http://store.secretcamp.cn/uPic/image-20210824182048104202108241820481629800448EpthIjEpthIj.png" alt="image-20210824182048104" style="zoom:40%;" />
+
+
+
+### 优缺点分析
+
+跳表可以实现对数据平均时间复杂度 O(logn) 的查找效率，有点类似于二叉平衡树，它们都可以对元素进行快速的查找。
+
+优点：
+
+- 实现更加简单
+- 插入和删除往往不会导致平衡树进行全局调整
 
 
 
 
 
-![image-20210814160642192](http://store.secretcamp.cn/uPic/image-20210814160642192202108141606421628928402l2DR3Wl2DR3W.png)
+
+
+## WeakHashMap🐚
+
+### 设计思想
+
+`WeakHashMap` 的 `Entry` 继承自 `WeakReference`，被 `WeakReference` 关联的对象在下一次垃圾回收时会被回收。
+
+`WeakHashMap` 主要用来实现缓存，通过使用 `WeakHashMap` 来引用缓存对象，由 JVM 对这部分缓存进行回收。
+
+```java
+private static class Entry<K,V> extends WeakReference<Object> implements Map.Entry<K,V>
+```
+
+
+
+### 源码分析
 
 
 
@@ -1784,35 +1916,18 @@ hash 字段的值都是大于等于 0 的，因为小于 0 有特殊含义。
 
 # Collections☕
 
-## 概念
-
 `java.util.Collections` 是一个工具类，提供了对 Set 、List 、Map 进行排序、填充、查找元素的辅助方法。
 
 工具类中的方法都是静态方法，不需要实例化对象。
 
-## 方法
+
+
+## 相关方法
 
 - `public static <T> boolean addAll(Collection<T> c, T... elements)  `：往集合中添加一些元素。
 - `public static void shuffle(List<?> list) `：打乱集合顺序。
 - `public static <T> void sort(List<T> list)`：将集合中元素按照默认规则排序。
 - `public static <T> void sort(List<T> list，Comparator<? super T> )`：将集合中元素按照指定规则排序。
-
-```java
-public class demo_Collections {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("python");
-        list.add("java");
-        list.add("golang");
-        list.add("c++");
-        list.add("ruby");
-        Collections.shuffle(list);
-        for(String string: list) {
-            System.out.println(string);
-        }
-    }
-} 
-```
 
 
 
@@ -1820,7 +1935,7 @@ public class demo_Collections {
 
 首先创建 `Person` 类，实现 `Comparable `接口，重写 `Comparable ` 接口的 `compareTo` 方法
 
-```
+```java
 class Person implements Comparable<Person> {
     private String name;
     private int age;
@@ -1878,11 +1993,11 @@ public class demo_Comparable{
 
 ## Comparator
 
-Comparable和Comparator的区别
+`Comparable` 和 `Comparator` 的区别
 
-- Comparable：强行对实现它的每个类的对象进行整体排序。这种排序被称为类的自然排序，类的compareTo方法被称为它的自然比较方法。只能在类中实现 `compareTo()` 一次，不能经常修改类的代码实现自己想要的排序。实现此接口的对象列表（和数组）可以通过`Collections.sort` 和 `Arrays.sort` 进行自动排序，对象可以用作有序映射中的键或有序集合中的元素，无需指定比较器。
+- `Comparable`：强行对实现它的每个类的对象进行整体排序。这种排序被称为类的自然排序，类的compareTo方法被称为它的自然比较方法。只能在类中实现 `compareTo()` 一次，不能经常修改类的代码实现自己想要的排序。实现此接口的对象列表（和数组）可以通过`Collections.sort` 和 `Arrays.sort` 进行自动排序，对象可以用作有序映射中的键或有序集合中的元素，无需指定比较器。
 
-- Comparator：强行对某个对象进行整体排序。可以将 `Comparator` 传递给 `Collections.sort`或 `Arrays.sort` 方法，从而允许在排序顺序上实现精确控制。
+- `Comparator`：强行对某个对象进行整体排序。可以将 `Comparator` 传递给 `Collections.sort`或 `Arrays.sort` 方法，从而允许在排序顺序上实现精确控制。
 
 
 
@@ -1918,7 +2033,7 @@ public class demo_Comparator {
 
 ## Iterator
 
-JDK专门提供了一个接口 `java.util.Iterator` ，主要用于迭代访问 `Collection` 中的元素，因此 `Iterator` 对象也被称为迭代器。
+JDK 专门提供了一个接口 `java.util.Iterator` ，主要用于迭代访问 `Collection` 中的元素，因此 `Iterator` 对象也被称为迭代器。
 
 ```java
 public interface Iterator<E> {
@@ -1952,9 +2067,9 @@ public class demo {
 
 
 
-## 迭代器实现原理
+## Iterator实现原理
 
-Iterator迭代器对象在遍历集合时，内部采用指针的方式来跟踪集合中的元素，在调用 `Iterator` 的 `next` 方法之前，迭代器的索引位于第一个元素之前，不指向任何元素，当第一次调用迭代器的 `next` 方法后，迭代器的索引会向后移动一位，指向第一个元素并将该元素返回，当再次调用 `next` 方法时，迭代器的索引会指向第二个元素并将该元素返回，依此类推，直到 `hasNext` 方法返回 false ，表示到达了集合的末尾，终止对元素的遍历。
+Iterator 迭代器对象在遍历集合时，内部采用指针的方式来跟踪集合中的元素，在调用 `Iterator` 的 `next` 方法之前，迭代器的索引位于第一个元素之前，不指向任何元素，当第一次调用迭代器的 `next` 方法后，迭代器的索引会向后移动一位，指向第一个元素并将该元素返回，当再次调用 `next` 方法时，迭代器的索引会指向第二个元素并将该元素返回，依此类推，直到 `hasNext` 方法返回 false ，表示到达了集合的末尾，终止对元素的遍历。
 
 
 
@@ -1962,78 +2077,92 @@ Iterator迭代器对象在遍历集合时，内部采用指针的方式来跟踪
 
 1. 普通for循环
 
-```java
-for (int i=0;i < list.size();i++) {
-    String temp = list.get(i);
-    System.out.println(temp);
-}
-```
+   ```java
+   for (int i=0;i < list.size();i++) {
+       String temp = list.get(i);
+       System.out.println(temp);
+   }
+   ```
 
-2. 增强for循环
+   
 
-```java
-for (String temp:list) {
-    System.out.println(temp);
-}
-```
+2. foreach 循环
+
+   ```java
+   for (String temp:list) {
+       System.out.println(temp);
+   }
+   ```
+
+
 
 3. 迭代器和for循环
 
-```java
-for (Iterator<String> iter = list.iterator(); iter.hasNext();) {
-    String temp = iter.next();
-    System.out.println(temp);
-}
-```
+   ```java
+   for (Iterator<String> iter = list.iterator(); iter.hasNext();) {
+       String temp = iter.next();
+       System.out.println(temp);
+   }
+   ```
+
+   
 
 4. 迭代器和while循环
 
-```java
-Iterator<String > iter = list.iterator();
-while(iter.hasNext()) {
-    String temp = iter.next();
-    iter.remove();  // 一边遍历一边删除推荐使用这种方式
-    System.out.println(temp);
-}
-```
+   ```java
+   Iterator<String > iter = list.iterator();
+   while(iter.hasNext()) {
+       String temp = iter.next();
+       iter.remove();  // 一边遍历一边删除推荐使用这种方式
+       System.out.println(temp);
+   }
+   ```
+
+   
 
 
 
 ## 遍历Map
 
-1. 通过keySet方法和增强for循环
+1. 通过 `keySet()` 方法和 foreach 循环
 
-```java
-for (Integer key:map.keySet()){
-    System.out.println(key + " --- " + map.get(key));
-}
-```
+   ```java
+   for (Integer key:map.keySet()){
+       System.out.println(key + " --- " + map.get(key));
+   }
+   ```
 
-2. 通过keySet方法和迭代器
 
-```java
-Set<Integer> keyset = map.keySet();  // 生成存储key的集合
-for(Iterator<Integer> iter = keyset.iterator();iter.hasNext();) {
-    Integer key =  iter.next();
-    System.out.println(key + " --- " + map.get(key));
-}
-```
 
-3. 通过enteySet方法迭代器
+2. 通过 `keySet()` 方法和迭代器
 
-```java
-Set<Map.Entry<Integer, String>> kv = map.entrySet();  // 生成存储Entry的集合
-for(Iterator<Map.Entry<Integer, String>> iter = kv.iterator(); iter.hasNext();) {
-    Map.Entry<Integer, String> temp = iter.next();
-    System.out.println(temp.getKey() + " --- " + temp.getValue());
-}
-```
+   ```java
+   Set<Integer> keyset = map.keySet();  // 生成存储key的集合
+   for(Iterator<Integer> iter = keyset.iterator();iter.hasNext();) {
+       Integer key =  iter.next();
+       System.out.println(key + " --- " + map.get(key));
+   }
+   ```
+
+   
+
+3. 通过 `entrySet()` 方法和迭代器（推荐）
+
+   ```java
+   Set<Map.Entry<Integer, String>> kv = map.entrySet();  // 生成存储Entry的集合
+   for(Iterator<Map.Entry<Integer, String>> iter = kv.iterator(); iter.hasNext();) {
+       Map.Entry<Integer, String> temp = iter.next();
+       System.out.println(temp.getKey() + " --- " + temp.getValue());
+   }
+   ```
+
+   
 
 
 
 ## Iterable
 
-JDK5 引入了新接口 `Iterable` ，该接口包含一个能够产生 `Iterator` 接口的 `iterator` 方法，并且 `Iterable` 对象被`foreach` 用来在序列中移动，因此创建的任何实现了 `Iterable` 接口的类都可以将它用于 `foreach` 。
+JDK5 引入了新接口 `Iterable` ，该接口包含一个能够产生 `Iterator` 接口的 `iterator` 方法，并且 `Iterable` 对象被 `foreach` 用来在序列中移动，因此创建的任何实现了 `Iterable` 接口的类都可以将它用于 `foreach` 。
 
 `Iterable` 接口是 `Collection` 的顶层接口
 
@@ -2051,6 +2180,10 @@ public interface Iterable<T> {
 ```
 
 
+
+
+
+# 容器操作☕
 
 ## 迭代的同时删除元素
 
@@ -2088,7 +2221,9 @@ public void test04() {
 
 
 
-正确的方法： 使用 迭代器的 `remove()` 方法
+正确的方法： 使用迭代器遍历，并调用迭代器的 `remove` 方法
+
+注意不要在 foreach 循环里进行元素的 `remove/add` 操作，因为这里调用的是集合自己的方法，而不是迭代器的 `remove/add`方法，这就导致迭代器莫名其妙地发现自己有元素被 `remove/add` ，然后，它就会抛出一个 `ConcurrentModificationException` 来提示用户发生了并发修改异常。
 
 ```java
 @Test
@@ -2114,4 +2249,31 @@ public void test0() {
     }
 }
 ```
+
+
+
+
+
+## 集合元素去重
+
+去重有两种方式：
+
+1. 利用 `HashSet` 去重，复杂度 O(n)
+2. 遍历 `List` ，将不重复的元素添加到新 `List`，复杂度 O(n<sup>2</sup>)
+
+两者的核心差别在于 `contains()` 方法的实现：
+
+添加元素的时间复杂度都是  O(n) ，但是 `HashSet`  的 `contains()` 方法复杂度是 O(1) ，总体来说效率更高。
+
+
+
+## 集合转数组
+
+
+
+
+
+
+
+## 数组转集合
 

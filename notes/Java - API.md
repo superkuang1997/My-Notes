@@ -1,7 +1,3 @@
-包装类
-
-
-
 # 包装类☕
 
 ## 概念
@@ -172,45 +168,188 @@ public static Integer valueOf(int i) {
 
 # Object☕
 
-## 概述
-
 `java.lang.Object `是Java语言中的根类，即所有类的父类。它中描述的所有方法子类都可以使用。在对象实例化的时候，最终找的父类就是 `Object` 。
 
 如果一个类没有特别指定父类，那么默认则继承自 `Object` 类。
 
+
+
 ## 方法
 
-Object类当中包含的方法有11个，常用的方法有：
+Object 类当中包含的方法有 11 个
 
-* `public String toString()`：返回该对象的字符串表示。
 
-  ```java
-  public String toString() {
-      return getClass().getName() + "@" + Integer.toHexString(hashCode());
-  }
-  ```
 
-  Object类中的 `toString` 方法会返回对象的 `类型@地址`
+### hashcode
 
-* `public boolean equals(Object obj)`：指示其他某个对象是否与此对象“相等”。
+`Object#hashcode` 方法返回的 hash 值即该对象的 32 位逻辑地址
 
-  ```java
-  public boolean equals(Object obj) {
-      return (this == obj);
-  }
-  ```
+```java
+int[] array = new int[]{1, 2, 3};
+System.out.println(array.hashCode());  // 78308db1
+```
 
-  如果没有覆盖重写equals方法，那么Object类中默认进行 `==` 运算符的**对象地址比较**，只要不是同一个对象，结果必然为false。如果希望进行**对象内容比较**，即所有或指定的部分成员变量相同就判定相同，则可以**覆盖重写equals方法**。
 
+
+### toString
+
+`public String toString()`：返回该对象的字符串表示。
+
+```java
+public String toString() {
+    return getClass().getName() + "@" + Integer.toHexString(hashCode());
+}
+```
+
+Object类中的 `toString` 方法会返回对象的 `类型@十六进制地址`
+
+
+
+### equals
+
+`public boolean equals(Object obj)`：指示其他某个对象是否与此对象“相等”。
+
+```java
+public boolean equals(Object obj) {
+    return (this == obj);
+}
+```
+
+如果没有覆盖重写equals方法，那么Object类中默认进行 `==` 运算符的对象地址比较，只要不是同一个对象，结果必然为 false。
+
+如果希望进行对象内容比较，即所有或指定的部分成员变量相同就判定相同，则可以覆盖重写equals方法。
+
+
+
+
+
+
+
+
+
+
+
+## equals和==
+
+`==`  ：对于基本数据类型，是比较双方的值，对于引用数据数据类型，比较是否是同一个对象
+
+`equals` ：是比较双方的内容是否相等。
+
+
+
+
+
+## 重写equals方法
+
+对于 User 对象，只需姓名和年龄相等则认为是同一个对象。
+
+如果不重写 `equals` 方法，那么 比较的就是两个对象的地址，肯定是不相等的
+
+```java
+@Override
+public boolean equals(Object obj) {  
+  	//  地址相等
+    if(this == obj){
+        return true;
+    }
+		// 非空性：对于任意非空引用x，x.equals(null)应该返回false。
+    if(obj == null){
+        return false;
+    }
+
+    if(obj instanceof User){
+        User other = (User) obj;
+        // 需要比较的字段相等，则这两个对象相等
+        if(Objects.equals(this.name, other.name) && Objects.equals(this.age, other.age)){
+            return true;
+        }
+    }
+
+    return false;
+}
+```
+
+
+
+```java
+// 重写equals方法
+@Override
+public boolean equals(Object obj) {
+    // hashCode相等 => 相等
+    if (this == obj) return true;
+    // 不是同一个类 => 不相等
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Player player = (Player) obj;
+  	// 比较自定义的属性是否相等
+    return id == player.id;
+}
+```
+
+
+
+## 重写hashCode方法
+
+如果重写 `equals` 方法，则还必须要重写 `hashCode` 方法
+
+如果不重写 `hashCode` 方法，会出现什么样的问题？
+
+- equals效率低
+
+  重写 `hashCode` 方法，先进行哈希判断，如果相同那肯定是同一个对象，那么就没必要再进行 `equals` 的比较了，这样就大大减少了 equals 比较的次数。
+
+- 影响哈希容器数据一致性
+
+  用 `HashMap` 和 `HashSet` 之类的基于哈希算法的集合类存储自定义对象类中，会根据对象的哈希值去进行寻址，如果不重写 `hashCode` 方法，则默认使用 `Object` 的 `hashCode()` 方法，而这个方法返回的是对象的内存地址，这就会把相同的对象当成不同的对象，因为它们的哈希值是不同的。
+
+如果重写了 `equals` 而未重写 `hashcode` 方法，可能就会出现两个内容相同的对象  `hashcode` 不相同的，导致这两个对象都能被放入 HashSet 中。
+
+```java
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class User {
+    int id;
+    String name;
+    int age;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof User) {
+            User other = (User) obj;
+            if (Objects.equals(this.name, other.name) && Objects.equals(this.age, other.age)) {
+                return true;
+            }
+        }
+        return false;
+    }
   
+    public static void main(String[] args) {
+        User user1 = new User(1, "老哥", 18); 
+        User user2 = new User(1, "老哥", 18);
+        System.out.println(user1.hashCode()); // 666988784
+        System.out.println(user2.hashCode()); // 1414644648
+        Set<User> set = new HashSet<>();
+        System.out.println(set.add(user1)); // true
+        System.out.println(set.add(user2)); // true
+    }  
+}
+```
 
----
-
-> Object类中有7个native方法，native方法是指用非java语言实现的方法，这里是由c/c++来完成，放在.dll动态库文件。
+会发现p1和p2都被放入了 `HashSet` 之中，因为没有重写 `hashCode` 方法，这两个对象的哈希值是不同的。
 
 
 
-## Objects类
+
+
+
+
+## Objects工具类
 
 JDK7 添加了一个 `Objects` 工具类，它提供了一些方法来操作对象，它由一些静态的实用方法组成，这些方法是null-save（空指针安全的）或 null-tolerant（容忍空指针的）
 
@@ -557,6 +696,20 @@ A和B虽然被定义为常量，但是它们都没有马上被赋值。在运算
 
 
 
+## 转义符
+
+`\\`  会转义成反斜杠 `\` ，而 `\\|` 的含义就是使用反斜杠对 | 进行转义。
+
+```java
+String t = "a||b||c||d";
+String[] temp = t.split("\\|\\|");
+System.out.println(temp.length);
+```
+
+
+
+
+
 # StringBuilder☕
 
 ## 概述
@@ -652,6 +805,10 @@ public class ListTest {
     }
 }
 ```
+
+
+
+### hashCode
 
 
 
@@ -908,6 +1065,8 @@ Date thetime = df.parse(date);  // 事件对象 ---> Fri Sep 04 00:34:56 GMT+08:
 
 `java.util.Calendar` 是日历类，在Date后出现，替换掉了许多Date的方法。该类将所有可能用到的时间信息封装为静态成员变量，方便获取。日历类就是方便获取各个时间属性的。
 
+
+
 ## 方法
 
 GregorianCalendar是Calendar的一个具体子类，提供了世界上大多数国家/地区使用的标准日历系统。
@@ -951,13 +1110,15 @@ Calendar类中提供很多成员常量，代表给定的日历字段：
 | SECOND       | 秒                                    |
 | DAY_OF_WEEK  | 周中的天（周几，周日为1，可以-1使用） |
 
-#### 
+
 
 # System☕
 
 ## 概念
 
-`java.lang.System`类中提供了大量的静态方法，可以获取与系统相关的信息或系统级操作
+`java.lang.System` 类中提供了大量的静态方法，可以获取与系统相关的信息或系统级操作
+
+
 
 ## 方法
 
@@ -993,8 +1154,107 @@ public class demo {
 
 
 
+## System.out
+
+`System.out` 是 `System` 静态数据成员，这个成员是 `java.io.PrintStream` 类的引用，JVM 在启动时会对这个变量进行初始化。
+
+`println()` 就是 `java.io.PrintStream` 类里的一个方法，它的作用是向控制台输出信息。
+
+因为 `System.out` 是 `java.io.PrintStream` 类的实例的引用，所以可以通过 `System.out.println()` 来调用此方法。
+
+
+
+# Unsafe☕
+
+## 概念
+
+Java和 C++ 的一个重要区别就是 Java 无法直接操作一块内存区域，不能像 C++ 那样可以自己申请内存和释放内存。而  `Unsafe` 类提供了类似 C++ 手动管理内存的能力。
+
+*JDK 5* 之后，Java 类库中才开始使用 CAS 操作，该操作由 `sun.misc.Unsafe` 类里面的 `compareAndSwapInt()` 和 `compareAndSwapLong()` 之类的几个方法包装提供。
+
+
+
+
+
+## getXXX
+
+普通读写
+
+```java
+public native int getInt(Object o, long offset);
+
+public native void putInt(Object o, long offset, int x);
+```
+
+
+
+
+
+## getXXXVolatile
+
+volatile读写
+
+```java
+public native int getIntVolatile(Object o, long offset);
+
+public native void putIntVolatile(Object o, long offset, int x);
+```
+
+
+
+
+
+## compareAndSwapXXX
+
+compareAndSwapXXX 相关的方法就是借助 C 语言来调用 CPU 底层指令实现的
+
+参数 o: 表示要操作的对象
+
+参数 offset: 表示要操作象中属性地址的偏移量
+
+参数 expected: 表示需要修改数据的期望的值
+
+参数 x: 表示需要修改为的新值
+
+```java
+public final native boolean compareAndSwapInt(Object o, long offset,
+                                              int expected,
+                                              int x);
+```
+
+
+
+### getAndAdd/SetXXX
+
+该方法同时只有一个线程能够执行，其他线程会进入忙自旋。
+
+同一时刻只有一个线程能够完成 CAS 操作，其他线程执行到 A 的时候，v 已经变成了旧值，CAS 会返回 false，然后 dowhile 循环会一直执行。并发程度越高该方法的性能也就越低。
+
+```java
+public final int getAndAddInt(Object o, long offset, int delta) {
+    int v;
+    do {
+        v = getIntVolatile(o, offset);
+    } while (!compareAndSwapInt(o, offset, v, v + delta));  // A
+    return v;
+}
+
+public final int getAndSetInt(Object o, long offset, int newValue) {
+    int v;
+    do {
+        v = getIntVolatile(o, offset);
+    } while (!compareAndSwapInt(o, offset, v, newValue));
+    return v;
+}
+```
+
+
+
+
+
 
 
 # Guava☕
 
 https://blog.csdn.net/github_shequ/article/details/112001280
+

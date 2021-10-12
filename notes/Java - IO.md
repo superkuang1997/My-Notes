@@ -1,12 +1,12 @@
 
 
-# IO概述🍭
+# I/O概述🍭
 
-IO（Input-Output）
+I/O（Input / Output）
 
-在Java程序中，对于数据的输入/输出操作以 “流”（stream）的方式进行；
+在 Java 程序中，对于数据的输入/输出操作以 “流”（stream）的方式进行；
 
-以下是`Java.io`包中最重要的就是5个类和3个接口
+以下是 `Java.io` 包中最重要的就是 5 个类和 3 个接口
 
 | 类           | 说明       |
 | ------------ | ---------- |
@@ -21,14 +21,14 @@ IO（Input-Output）
 
 
 
-## IO分类
+## I/O分类
 
-**按数据分类**
+按数据分类：
 
 - 字节流：按照字节读取数据（InputStream、OutputStream）
 - 字符流：按照字符读取数据（Reader、Writer），因为文件编码的不同，从而有了对字符进行高效操作的字符流对象。原理：底层还是基于字节流操作，自动搜寻了指定的码表。
 
-**按功能分类**
+按功能分类：
 
 - 节点流：可以直接从数据源或目的地读写数据
 
@@ -36,7 +36,7 @@ IO（Input-Output）
 
 节点流和处理流的关系：
 
-①节点流处于io操作的第一线，所有操作必须通过他们进行；
+①节点流处于 I/O 操作的第一线，所有操作必须通过他们进行；
 
 ②处理流可以对其他流进行处理（提高效率或操作灵活性）。
 
@@ -951,7 +951,7 @@ public void test() throws Exception {
 
 ## 概述
 
-平时我们在控制台打印输出，是调用`print`方法和`println`方法完成的，这两个方法都来自于`java.io.PrintStream`类，该类能够方便地打印各种数据类型的值，是一种便捷的输出方式。
+平时我们在控制台打印输出，是调用 `print` 方法和 `println` 方法完成的，这两个方法都来自于`java.io.PrintStream`类，该类能够方便地打印各种数据类型的值，是一种便捷的输出方式。
 
 
 
@@ -994,11 +994,11 @@ public class PrintDemo {
 
 # BIO🍭
 
-## 概念
+## BIO的概念
 
-传统 BIO 是一种同步的阻塞 IO，IO 在进行读写时，该线程将被阻塞，线程无法进行其它操作。
+传统 BIO 是一种同步阻塞的 I/O，I/O 在进行读写时，该线程将被阻塞，线程无法进行其它操作。
 
-IO 流在读取时，会阻塞，直到发生以下情况：
+I/O 流在读取时，会阻塞，直到发生以下情况：
 
 - 有数据可以读取
 - 数据读取完成
@@ -1006,7 +1006,49 @@ IO 流在读取时，会阻塞，直到发生以下情况：
 
 
 
-## 阻塞同步的实现
+## 阻塞同步
+
+服务端创建一个 ServerSocket， 然后客户端用一个 Socket 去连接服务端的 ServerSocket， ServerSocket 接收到了一个的连接请求就创建一个 Socket 和一个线程去跟客户端的 Socket 进行通讯。
+
+客户端和服务端就进行阻塞式的通信，客户端发送一个请求，服务端 Socket 进行处理后返回响应，在响应返回前，客户端就阻塞等待。
+
+客户端连接到服务端之前，服务端阻塞在 *accept* 函数，经过三次握手连接成功之后，服务端阻塞在 *read* 函数， 客户端阻塞在 *write* 函数。
+
+![p77hp-duxvg](http://store.secretcamp.cn/uPic/p77hp-duxvg202108161550141629100214UkYWcpUkYWcp.gif)
+
+
+
+将 *read* 函数的细节展开，会发现其阻塞在了两个阶段。
+
+如果这个连接的客户端一直不发数据，那么服务端线程将会一直阻塞在 *read* 函数上不返回，也无法接受其他客户端连接。
+
+<img src="http://store.secretcamp.cn/uPic/image-20210816160020761202108161600211629100821lumNF9lumNF9.png" alt="image-20210816160020761" style="zoom:50%;" />
+
+
+
+
+
+## 多线程处理Socket
+
+可以采取多线程的方式处理每个 Socket，每当有一个 Socket 连接，就分配一个线程去读写数据。
+
+这样，当给一个客户端建立好连接后，服务端就可以立刻等待新的客户端连接，而不用阻塞在原客户端的 *read* 请求上。
+
+不过，这并不是非阻塞，只不过用了多线程的手段使得主线程没有卡在 *read* 函数上。操作系统提供的 *read* 函数仍然是阻塞的。
+
+![0h1k2-fewfa](http://store.secretcamp.cn/uPic/0h1k2-fewfa202108161606071629101167MnWMljMnWMlj.gif)
+
+
+
+缺点：每次一个客户端接入，都需要在服务端创建一个线程来服务这个客户端，如果有大量客户端到来，就会造成服务端的线程数量成千上万，会造成服务端过载过高而崩溃。
+
+
+
+
+
+
+
+## BIO的代码实现
 
 BIO 的阻塞有两个地方：`accept()` 和 `read()`
 
@@ -1022,10 +1064,12 @@ public class BioServerDemo {
         ServerSocket serverSocket = new ServerSocket(9999);
         System.out.println("服务启动成功");
         while (true) {
+            // 阻塞
             Socket socket = serverSocket.accept();
             System.out.println("连接成功");
             System.out.println("准备接收数据");
             byte[] bytes = new byte[1024];
+            // 阻塞
             socket.getInputStream().read(bytes);
             System.out.println("接收到了数据：" + new String(bytes));
         }
@@ -1060,43 +1104,40 @@ public class BioServerDemo {
 
 
 
-## 多线程并发
-
-BIO 模型的并发只能通过多线程。
-
-本实现通过多线程处理多个连接
-
-```
-
-```
-
-
-
 
 
 # NIO🍭
 
-## 概念
+## NIO的概念
 
-NIO（Non-blocking IO） 模型是一种同步非阻塞 IO，主要有三大核心部分：
+NIO（Non-blocking IO） 模型是一种同步非阻塞 I/O，主要有三大核心部分：
 
 - Channel（通道）
-
 - Buffer（缓冲区）
-
 - Selector（多路复用器）
 
-传统 IO 基于字节流和字符流进行操作，而 NIO 基于 Channel 和 Buffer 进行操作，数据总是从通道读取到缓冲区中，或者从缓冲区写入到通道中，Selector 用于监听多个通道的事件，因此，单个线程可以监听多个数据通道（IO多路复用）。
-
-NIO 的非阻塞模式，使一个线程从某通道发送请求读取数据，但是它仅能得到目前可用的数据，如果目前没有数据可用时，就什么都不会获取，不会保持线程阻塞，所以直至数据变的可以读取之前，该线程可以继续做其他的事情。
-
-非阻塞写也是如此。一个线程请求写入一些数据到某通道，但不需要等待它完全写入，这个线程同时可以去做别的事情。线程通常将非阻塞 IO 的空闲时间用于在其它通道上执行 IO 操作，所以一个单独的线程现在可以管理多个输入和输出通道。
+NIO 理解为 New-IO 比较好，因为 NIO 主要分为File I/O 和 Socket I/O 两大场景，而 “非阻塞” 是 Socket I/O 的特性。
 
 
 
+## 非阻塞同步
+
+传统 I/O 基于字节流和字符流进行操作，而 NIO 基于 Channel 和 Buffer 进行操作，数据总是从通道读取到缓冲区中，或者从缓冲区写入到通道中，其中 Selector 用于监听多个通道的事件，因为一个客户端并不是时时刻刻都有数据进行交互，服务端没必要开一个线程一直服务一个客户端。因此，通过 Selector 单个线程可以监听多个数据通道（I/O多路复用），相当于仅用一个线程轮询处理大量的客户端的请求，每次获取一批有事件的 Channel，然后对每个请求启动一个线程处理即可。
+
+NIO 的核心是 “非阻塞同步”，一个 I/O 操作（read/write系统调用）其实分成了两个步骤：
+
+1. 发起 I/O 请求
+2. 实际的 I/O 读写。
+
+阻塞 I/O 和非阻塞 I/O 的区别在于第一步，发起 I/O 请求的进程是否会被阻塞，在 NIO 中的 write 和 read 都不会被阻塞，所以 NIO 是非阻塞的。
+
+同步 I/O 和异步 I/O 的区别就在于第二步，实际的 I/O 读写（内核态与用户态的数据拷贝）是否需要当前进程参与，如果需要进程参与则是同步 I/O ，如果不需要进程参与就是异步 I/O， NIO 中实际的读写需要当前进程参与，所以是同步的。
+
+<img src="http://store.secretcamp.cn/uPic/image-20210824195014559202108241950141629805814WlQKJmWlQKJm.png" alt="image-20210824195014559" style="zoom:40%;" />
 
 
-NIO采用的是一种多路复用的机制，利用单线程轮询事件，高效定位就绪的 Channel 来决定做什么，只是 Select 阶段是阻塞式的，能有效避免大量连接数时，频繁线程的切换带来的性能或各种问题。
+
+除了以上两个步骤，其他步骤不一定是非阻塞同步的，例如 Selector 调用 `select()` 函数是一个同步阻塞的操作，但是底层 epoll 的实现是异步的，当有客户端传来的数据到达 Socket 缓冲区时，经过 I/O 多路复用，服务端会使用一个线程去处理，但这并不是实时的，因为这条链路是事件驱动的，可以认为这个过程是异步的。
 
 ![image-20210428105848435](http://store.secretcamp.cn/uPic/image-20210428105848435202104281606421619597202ZLzBuHZLzBuH.png)
 
@@ -1104,32 +1145,34 @@ NIO采用的是一种多路复用的机制，利用单线程轮询事件，高�
 
 
 
-## IO 与 NIO
+## BIO与NIO
 
-- IO 是面向流的，NIO 是面向缓冲区的
+- BIO 是面向流的，NIO 是面向缓冲区（块）的
+  - I/O 面向流意味着每次从流中读一个或多个字节，直至读取所有字节，它们没有被缓存在任何地方。此外，它不能前后移动流中的数据。如果需要前后移动从流中读取的数据，需要先将它缓存到一个缓冲区。
+  - NIO 的缓冲导向方法略有不同，数据读取到一个它稍后处理的缓冲区，需要时可在缓冲区中前后移动。这就增加了处理过程中的灵活性。
 
-  IO 面向流意味着每次从流中读一个或多个字节，直至读取所有字节，它们没有被缓存在任何地方。此外，它不能前后移动流中的数据。如果需要前后移动从流中读取的数据，需要先将它缓存到一个缓冲区。NIO 的缓冲导向方法略有不同，数据读取到一个它稍后处理的缓冲区，需要时可在缓冲区中前后移动。这就增加了处理过程中的灵活性。
-
-- IO 是阻塞的，NIO 是非阻塞的
-
-  当一个线程调用 `read()` 或 `write()` 时，该线程被阻塞，直到有一些数据被读取，或数据完全写入。该线程在此期间不能再干任何事情了。 NIO 的非阻塞模式，使一个线程从某通道发送请求读取数据，但是它仅能得到目前可用的数据，如果目前没有数据可用时，就什么都不会获取。而不是保持线程阻塞，所以直至数据变得可以读取之前，该线程可以继续做其他的事情。
-
-
+- BIO 是阻塞的，NIO 是非阻塞的
+  - BIO 中当一个线程调用 `read()` 或 `write()` 时，该线程被阻塞，直到有一些数据被读取，或数据完全写入，该线程在此期间不能再干任何事情了。
+  -  NIO 的非阻塞模式，使一个线程从某通道发送请求读取数据，但是它仅能得到目前可用的数据，如果目前没有数据可用时，就什么都不会获取。而不是保持线程阻塞，所以直至数据变得可以读取之前，该线程可以继续做其他的事情。非阻塞写也是如此，一个线程请求写入一些数据到某通道，但不需要等待它完全写入，这个线程同时可以去做别的事情。线程通常将非阻塞 I/O 的空闲时间用于在其它通道上执行 I/O 操作，所以一个单独的线程现在可以管理多个输入和输出 Channel 。
 
 
 
 ## Channel
 
-Channel，一般是指 "通道" 。 Channel 和 IO 中的 Stream 是差不多一个等级的。
+Channel，一般是指 “通道” ，通道表示打开到 I/O 设备（文件、套接字）的连接
 
-Stream 是单向的，例如 `InputStream` 、`OutputStream`。而 Channel 是双向的，既可以用来进行读操作，又可以用来进行写操作。
+Channel 和 I/O 中的流类似，但也有区别：
+
+1. Channel 是双向的，既可以读又可以写，而流是单向的
+2. Channel 可以进行异步的读写
+3. Channel 的读写必须通过 Buffer 对象
 
 Channel 的主要实现有：
 
-- `FileChannel`
-- `DatagramChannel`
-- `SocketChannel`
-- `ServerSocketChannel`
+- `FileChannel` （文件）
+- `DatagramChannel` （UDP）
+- `SocketChannel` （TCP Client）
+- `ServerSocketChannel`（TCP Server）
 
 
 
@@ -1137,13 +1180,69 @@ Channel 的主要实现有：
 
 
 
-### ServerSocketChannel
+
+
+### 文件读写
+
+通过 FileChannel 实现文件拷贝
+
+```java
+public static void copyFileUseNIO(String src, String dst) throws IOException {
+    // 声明源文件和目标文件
+    FileInputStream fi = new FileInputStream(new File(src));
+    FileOutputStream fo = new FileOutputStream(new File(dst));
+    // 获得传输通道channel
+    FileChannel inChannel = fi.getChannel();
+    FileChannel outChannel = fo.getChannel();
+    // 获得容器buffer
+    ByteBuffer buffer = ByteBuffer.allocate(4);
+    while (true) {
+        // 判断是否读完文件
+        int eof = inChannel.read(buffer);
+        if (eof == -1) {
+            break;
+        }
+        // 重设一下buffer的position=0，limit=position
+        buffer.flip();
+        // 开始写
+        outChannel.write(buffer);
+        // 写完要重置buffer，重设position=0,limit=capacity
+        buffer.clear();
+    }
+    inChannel.close();
+    outChannel.close();
+    fi.close();
+    fo.close();
+}
+```
+
+
+
+### 网络通信
+
+如果基于 NIO 进行网络通信，采取的就是多路复用的 I/O 模型，这个多路复用 I/O 模型针对的是网络通信中的 I/O 场景而言的。
+
+在基于 Socket 进行网络通信的时候，如果有多个客户端与服务端建立了 Socket 连接，那么就需要维护多个 Socket 连接。对于 I/O多路复用模型，在 Java 代码的层面进行一个 select 函数调用，然后会进入一个同步等待的状态，必须在这里同步等待某个 Socket 连接有请求到来。
+
+在 select 函数的底层实现中，会通过非阻塞的方式轮询各个Socket，任何一个Socket 如果没有数据到达，那么根据非阻塞的特性会立即返回一个信息，然后 select 函数可以轮询下一个 Socket，不会阻塞在某个 Socket 上。
+
+<img src="http://store.secretcamp.cn/uPic/image-20210816101931465202108161019311629080371W4yGl6W4yGl6.png" alt="image-20210816101931465" style="zoom:50%;" />
+
+
 
 
 
 
 
 ## Buffer
+
+Buffer 指 “缓冲区”，实际上是一个容器，一个连续数组。
+
+Channel 提供从文件、网络读取数据的渠道，但是读写的数据都必须经过 Buffer 。
+
+![image-20210816104842243](http://store.secretcamp.cn/uPic/image-20210816104842243202108161048421629082122R3hiA0R3hiA0.png)
+
+
 
 NIO 中的关键 Buffer 实现有：
 
@@ -1164,9 +1263,112 @@ NIO 中的关键 Buffer 实现有：
 
 
 
+### 缓冲区的类型
+
+Buffer 主要分为两种类型：
+
+- 直接缓冲区：通过 `allocate()` 方法分配的缓冲区，将缓冲区建立在 JVM 的内存中
+
+- 非直接缓冲区：通过 `allocateDirect()` 方法分配的缓冲区，将缓冲区建立在操作系统的物理内存中，可以利用零拷贝提高效率
+
+
+
+对于非直接缓冲区，使用的是传统 I/O 的数据拷贝流程
+
+<img src="http://store.secretcamp.cn/uPic/image-20210816124713353202108161247131629089233lVJyealVJyea.png" alt="image-20210816124713353" style="zoom:40%;" />
+
+
+
+对于直接缓冲区，则使用零拷贝进行优化
+
+<img src="http://store.secretcamp.cn/uPic/image-20210816124811365202108161248111629089291Ut8yS7Ut8yS7.png" alt="image-20210816124811365" style="zoom:45%;" />
+
+
+
+### Buffer的使用
+
+Buffer 的使用遵循以下几个步骤：
+
+- 分配空间
+- 写入数据到 Buffer
+- 调用 `filp()` 方法
+- 从Buffer中读取数据
+- 调用 `clear()` 方法或者 `compact()` 方法
+
+
+
+
+
+#### 状态变量
+
+控制 Buffer 状态的三个变量：
+
+- capacity：代表缓冲区的最大容量，一般新建一个缓冲区的时候，limit 的值和 capacity 的值默认是相等的。
+
+- position：跟踪已经写了多少数据或读了多少数据，它指向的是下一个要操作的数据元素的位置
+
+- limit：代表还有多少数据可以取出或还有多少空间可以写入，它的值小于等于capacity
+
+- mark：用于记录当前 position 的前一个位置或者默认是 -1
+  
+
+
+
+#### flip
+
+ `flip()` 方法把当前的指针位置 position 设置成 limit ，再将当前指针 position 指向数据的最开始端，它的作用相当于从写模式切换到读模式。
+
+
+
+调用 `flip()` 方法之前：
+
+<img src="http://store.secretcamp.cn/uPic/image-20210816105152267202108161051521629082312KbvQNFKbvQNF.png" alt="image-20210816105152267" style="zoom:50%;" />
+
+
+
+调用 `flip()` 方法之后：
+
+<img src="http://store.secretcamp.cn/uPic/image-20210816105203436202108161052031629082323cveNGJcveNGJ.png" alt="image-20210816105203436" style="zoom:50%;" />
+
+
+
+#### clear
+
+`clear()`方法将 position 将被设回0，limit 设置成 capacity，换句话说，可以认为 Buffer 被清空了。
+
+
+
+#### compact
+
+`compact()` 方法将所有未读的数据拷贝到 Buffer 起始处，然后将 position 设到最后一个未读元素正后面，limit 设置成 capacity 。
+
+
+
+### MappedByteBuffer
+
+Channel 就相当于操作系统中的内核缓冲区，有可能是读缓冲区，也有可能是网络缓冲区，而 Buffer 就相当于操作系统中的用户缓冲区。
+
+`MappedByteBuffer` 的底层就是通过 mmap 实现的。
+
+`MappedByteBuffer` 是一个抽象类，`DirectByteBuffer` 是它的一个具体实现。
+
+
+
+### DirectByteBuffer
+
+`DirectByteBuffer` 是堆外内存的代理类
+
+
+
+
+
+
+
 ## Selector
 
-Selector是一个多路复用器，它运行单线程管理多个被注册到其之上的 Channel 。
+NIO 之所以叫做非阻塞 I/O，主要是因为 NIO 在网络通信中的非阻塞特性被广泛使用。
+
+Selector 是一个多路复用器，它运行单线程管理多个被注册到其之上的 Channel 。
 
 Selector 的实现取决于操作系统，目前 IO 多路复用实现主要包括四种：select、poll、epoll、kqueue
 
@@ -1174,132 +1376,99 @@ Selector 的实现取决于操作系统，目前 IO 多路复用实现主要包�
 
 Selector 对应操作系统的 Epoll 描述符，将获取到的 Socket 连接的文件描述符的事件绑定到 Selector 对应的 Epoll 文件描述符上，进行事件的异步通知。
 
-```java
-public abstract class Selector implements Closeable {
 
-    protected Selector() { }
-	  
-    public static Selector open() throws IOException {
-        return SelectorProvider.provider().openSelector();
-    }
 
-    public abstract boolean isOpen();
+## NIO中的零拷贝
 
-    public abstract SelectorProvider provider();
+BIO 下，调用 `write()` 方法将 byte 数组从 JVM 拷贝到内核缓冲区，然后再拷贝到 Socket 缓冲区
 
-    public abstract Set<SelectionKey> keys();
+如果使用 `MappedByteBuffer` ，JVM 在网络传输中允许使用堆外内存，JVM 直接将 buffer 分配在堆外内存，然后调用 `write()` 方法，此时操作系统会直接将数据从内核缓冲区拷贝到 Socket 缓冲区中，减少了一次拷贝过程，实现了零拷贝。
 
-    public abstract Set<SelectionKey> selectedKeys();
-
-    public abstract int select(long timeout)
-        throws IOException;
-
-    public abstract int select() throws IOException;
-
-    public abstract Selector wakeup();
-
-    public abstract void close() throws IOException;
-
-}
-```
+之所以要使用堆外内存，一是因为 buffer 数据地址是连续的且属于大对象，如果在 JVM 中可能会收到 GC 影响，对象可能会被清理、移动（晋升到老年代），二是零拷贝技术能够提高传输效率。
 
 
 
-## SelectorProvider
+代码分析：
+
+在 `SocketChannelImpl` 中的 `write()` 方法调用了 `IOUtil.write()` 方法
 
 ```java
-public abstract class SelectorProvider {
+static int write(FileDescriptor var0, ByteBuffer var1, long var2, NativeDispatcher var4) throws IOException {		
+  	// 如果是堆外内存，直接拷贝到Socket缓冲区
+    if (var1 instanceof DirectBuffer) {
+        return writeFromNativeBuffer(var0, var1, var2, var4);
+    } 
+    // 如果不是堆内内存，先拷贝到堆外，再拷贝到Socket缓冲区
+    else {
+        int var5 = var1.position();
+        int var6 = var1.limit();
 
-    private static final Object lock = new Object();
-    private static SelectorProvider provider = null;
+        assert var5 <= var6;
 
-    protected SelectorProvider() {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null)
-            sm.checkPermission(new RuntimePermission("selectorProvider"));
-    }
+        int var7 = var5 <= var6 ? var6 - var5 : 0;
+        // 申请堆外空间并拷贝
+        ByteBuffer var8 = Util.getTemporaryDirectBuffer(var7);
 
-    private static boolean loadProviderFromProperty() {
-        String cn = System.getProperty("java.nio.channels.spi.SelectorProvider");
-        if (cn == null)
-            return false;
+        int var10;
         try {
-            Class<?> c = Class.forName(cn, true,
-                                       ClassLoader.getSystemClassLoader());
-            provider = (SelectorProvider)c.newInstance();
-            return true;
-        } catch (ClassNotFoundException x) {
-            throw new ServiceConfigurationError(null, x);
-        } catch (IllegalAccessException x) {
-            throw new ServiceConfigurationError(null, x);
-        } catch (InstantiationException x) {
-            throw new ServiceConfigurationError(null, x);
-        } catch (SecurityException x) {
-            throw new ServiceConfigurationError(null, x);
-        }
-    }
-
-    private static boolean loadProviderAsService() {
-
-        ServiceLoader<SelectorProvider> sl =
-            ServiceLoader.load(SelectorProvider.class,
-                               ClassLoader.getSystemClassLoader());
-        Iterator<SelectorProvider> i = sl.iterator();
-        for (;;) {
-            try {
-                if (!i.hasNext())
-                    return false;
-                provider = i.next();
-                return true;
-            } catch (ServiceConfigurationError sce) {
-                if (sce.getCause() instanceof SecurityException) {
-                    continue;
-                }
-                throw sce;
+            var8.put(var1);
+            var8.flip();
+            var1.position(var5);
+            // 拷贝到Socket缓冲区
+            int var9 = writeFromNativeBuffer(var0, var8, var2, var4);
+            if (var9 > 0) {
+                var1.position(var5 + var9);
             }
+
+            var10 = var9;
+        } finally {
+            Util.offerFirstTemporaryDirectBuffer(var8);
+        }
+
+        return var10;
+    }
+}
+```
+
+
+
+所以，如果直接使用 `DirectByteBuffer` ，就可以利用零拷贝，否则还要多拷贝一次。
+
+
+
+## 堆外内存的释放
+
+在堆外内存的释放中，`DirectByteBuffer` 中有一个 cleaner 对象。
+
+clean 对象继承了虚引用，所以它持有 DirectByteBuffer 对象， 同时持有一个堆外内存释放器 `Deallocator`
+
+```java
+cleaner = Cleaner.create(this, new Deallocator(base, size, cap));
+```
+
+
+
+当 `DirectByteBuffer` 对象失去强引用后会被判定为垃圾，cleaner 作为仅被 DirectByteBuffer 对象引用的对象，也会被判定位垃圾，但 cleaner 是一个特殊的对象，因为当它被 GC 之后先被转移到在 pending 队列，然后不会像其他 `Reference` 一样转移到 `RefenceQueue`  ，而是直接执行 `cleaner.clean()` 方法，直接调用 `Deallocator`  的方法释放堆外内存。
+
+```java
+public void clean() {
+    if (remove(this)) {
+        try {
+            // 关键在这里
+            this.thunk.run();
+        } catch (final Throwable var2) {
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                public Void run() {
+                    if (System.err != null) {
+                        (new Error("Cleaner terminated abnormally", var2)).printStackTrace();
+                    }
+
+                    System.exit(1);
+                    return null;
+                }
+            });
         }
     }
-
-    public static SelectorProvider provider() {
-        synchronized (lock) {
-            if (provider != null)
-                return provider;
-            return AccessController.doPrivileged(
-                new PrivilegedAction<SelectorProvider>() {
-                    public SelectorProvider run() {
-                            if (loadProviderFromProperty())
-                                return provider;
-                            if (loadProviderAsService())
-                                return provider;
-                            provider = sun.nio.ch.DefaultSelectorProvider.create();
-                            return provider;
-                        }
-                    });
-        }
-    }
-
-    public abstract DatagramChannel openDatagramChannel()
-        throws IOException;
-
-    public abstract DatagramChannel openDatagramChannel(ProtocolFamily family)
-        throws IOException;
-
-    public abstract Pipe openPipe()
-        throws IOException;
-		
-  	// 返回一个 Selector 实例，这个实例就是 Epoll
-    public abstract AbstractSelector openSelector()
-        throws IOException;
-
-  	// 开启一个 ServerSocket Channel
-    public abstract ServerSocketChannel openServerSocketChannel()
-        throws IOException;
-
-
-    public Channel inheritedChannel() throws IOException {
-        return null;
-    }
-
 }
 ```
 
@@ -1307,7 +1476,7 @@ public abstract class SelectorProvider {
 
 
 
-## 非阻塞同步的实现
+## 非阻塞同步的代码实现
 
 本实现通过单个线程来处理多个连接
 
@@ -1366,82 +1535,14 @@ public class NioServerDemo {
 
 
 
-## 阻塞异步的实现
-
-本实现通过单个线程来处理多个连接
-
-Epoll 使用了事件机制，在复用器中注册了一个回调事件，当 Socket 中有数据过来的时候调用，通知用户处理信息，这样就不需要对全部的文件描述符进行轮询了。
-
-`select()` 方法仍然是阻塞的（相当于 `epoll_wait()` ），但是由于 Epoll 是事件驱动的（数据到达后中断程序唤醒阻塞进程），所以无需轮询，节约了 CPU 资源。
-
-这里监听 socket 的操作是阻塞的，单个 socket 的读写操作是非阻塞的
-
-```java
-public class NioSelectorServerDemo {
-
-    public static void main(String[] args) throws IOException {
-
-        // 创建 NIO ServerSocketChannel
-        ServerSocketChannel serverSocket = ServerSocketChannel.open();
-        serverSocket.socket().bind(new InetSocketAddress(9998));
-
-        // 设置 ServerSocketChannel 为非阻塞
-        serverSocket.configureBlocking(false);
-
-        // 打开 Selector 处理 Channel，即创建 epoll
-        Selector selector = Selector.open();
-
-        // 将 ServerSocket 注册到 selector 用来接收连接
-        serverSocket.register(selector, SelectionKey.OP_ACCEPT);
-        System.out.println("服务启动成功");
-
-        while (true) {
-          
-            // 阻塞等待需要处理的事件发生
-            selector.select();
-
-            // 获取selector中注册的全部事件的 SelectionKey 实例
-            Set<SelectionKey> selectionKeys = selector.selectedKeys();
-            Iterator<SelectionKey> iterator = selectionKeys.iterator();
-
-            // 遍历 SelectionKey 对事件进行处理
-            while (iterator.hasNext()) {
-                SelectionKey key = iterator.next();
-                iterator.remove();
-              
-                // 如果是OP_ACCEPT事件，则进行连接获取和事件注册
-                if (key.isAcceptable()) {
-                    ServerSocketChannel server = (ServerSocketChannel) key.channel();
-                    SocketChannel socketChannel = server.accept();
-                    socketChannel.configureBlocking(false);
-                    // 这里只注册了读事件，如果需要给客户端发送数据可以注册写事件
-                    socketChannel.register(selector, SelectionKey.OP_READ);
-                    System.out.println("客户端连接成功");
-                }
-
-                // 如果是OP_READ事件，则进行读取和打印
-                if (key.isReadable()) {
-                    SocketChannel socketChannel = (SocketChannel) key.channel();
-                    ByteBuffer byteBuffer = ByteBuffer.allocate(128);
-                    int read = socketChannel.read(byteBuffer);
-                    // 如果有数据，把数据打印出来
-                    if (read > 0) {
-                        System.out.println("接收到消息：" + new String(byteBuffer.array()));
-                    } else if (read == -1) { // 如果客户端断开连接，关闭Socket
-                        System.out.println("客户端断开连接");
-                        socketChannel.close();
-                    }
-                }
-            }
-
-        }
-
-    }
-
-}
-```
 
 
+# AIO🍭
 
+## AIO的概念
 
+Java 7 中引入了 NIO 的改进版 AIO（Asynchronous I/O），它是异步 I/O 模型。
 
+异步 I/O 是基于事件和回调机制实现的，也就是应用操作之后会直接返回，不会堵塞在那里，当后台处理完成，操作系统会通知相应的线程进行后续的操作。
+
+目前来说 AIO 的应用还不是很广泛。Netty 之前也尝试使用过 AIO，不过又放弃了。这是因为，Netty 使用了 AIO 之后，在 Linux 系统上的性能并没有多少提升。
