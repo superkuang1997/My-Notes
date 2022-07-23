@@ -32,6 +32,8 @@ service ssh start      # way2
 
 ## 权限管理
 
+### 权限范围
+
 - u：User，所有者，默认情况创建者就是所有者，只能有一个
 
 - g：Group，所属组，定义一组相同类型的用户，有使用权但没有所有权
@@ -45,7 +47,9 @@ service ssh start      # way2
 文件类型及权限 -- 引用计数 -- 所有者 -- 所属组 -- 大小（字节） -- 最后一次修改时间 -- 文件名
 ```
 
-文件类型：
+
+
+### 文件类型
 
 - 二进制文件：`-`
 - 目录：`d`
@@ -53,7 +57,7 @@ service ssh start      # way2
 
 
 
-权限代号：
+### 权限代号
 
 - r：读取权限，数字代号为 4；
 - w：写入权限，数字代号为 2；
@@ -70,61 +74,68 @@ service ssh start      # way2
 
 
 
-## 文件目录
+## 系统目录结构
+
+![image-20220401153821636](http://store.secretcamp.cn/uPic/image-20220401153821636202204011538221648798702n76RaLn76RaL.png)
 
 
 
-```markdown
+
+
+```
 - Linux
-/bin : Binary 的缩写，面向所有用户，存放着最经常使用的命令
-/sbin : 存放Super User（系统管理员）使用的系统管理命令（程序）
-/usr : Unix System Resource ，类似于Windows下的Program Files目录
-/usr/sbin : 非必要的系统二进制文件，例如：大量网络服务的守护进程
-/etc : 系统配置文件存放目录
-/var : 就是在系统运作后才会渐渐占用硬盘容量的目录，比如一些日志、MySQL等软件的数据文件
-/tmp : 临时存放文件，重要的文件请不要放在这个目录里
-/root : 超级管理员的家目录
-/home : 用户的家目录
+/bin：Binary 的缩写，面向所有用户，存放着最经常使用的命令
 
-/boot : 引导程序文件存放目录（启动Linux时使用的一些核心文件）
-/dev : Device（设备）的缩写，设备文件目录
-/lib 和 /lib64 : 共享库文件（类似于Windows里面的DDL文件） 存放目录
-/media : 可移除媒体（如CD-ROM）的挂载点
-/mnt : 用于临时挂载设备的目录
-/opt : 额外安装软件的地方（可选应用软件包存放目录）
-/proc : 虚拟文件系统
-/run : 代替/var/run 目录
-/srv : 是一些服务启动之后，这些服务所需要取用的资料目录，比如www服务的网页文件可以放在这里
+/sbin：存放Super User（系统管理员）使用的系统管理命令（程序）
+
+/usr：Unix System Resource ，可以理解为Windows下的 C:/Windows/ 目录
+
+/etc：存放所有的系统管理所需要的配置文件和子目录。
+
+/var : 就是在系统运作后才会渐渐占用硬盘容量的目录，比如一些日志、MySQL等软件的数据文件
+
+/tmp ： 临时存放文件，重要的文件请不要放在这个目录里
+
+/root : 超级管理员的家目录
+
+/home ： 用户的家目录
+
+/boot ： 引导程序文件存放目录（启动Linux时使用的一些核心文件）
+
+/dev ： Device（设备）的缩写，设备文件目录
+
+/lib ： Library，存放着系统最基本的动态连接共享库
+
+/media ： 可移除媒体（如CD-ROM）的挂载点
+
+/mnt ： 用于临时挂载设备的目录
+
+/opt ： optional，额外安装软件的地方（可选应用软件包存放目录），可以理解为Windows下的 D：/Software
+
+/proc ： 虚拟文件系统
+
+/run ： 代替/var/run 目录
+
+/srv ： 是一些服务启动之后，这些服务所需要取用的资料目录，比如www服务的网页文件可以放在这里
+
+/sys ： Linux2.6内核的一个很大的变化，该目录下安装了2.6内核中新出现的一个文件系统sysfs
+			 sysfs文件系统集成了下面3种文件系统的信息： 
+			 1. 针对进程信息的 proc 文件系统
+			 2. 针对设备的 devfs 文件系统
+			 3. 针对伪终端的 devpts 文件系统。
+
+/proc ： Processes，/proc 是一种伪文件系统（也即虚拟文件系统），存储的是当前内核运行状态的一系列特殊文件，这个目录是一个虚拟的目录，它是系统内存的映射，我们可以通过直接访问这个目录来获取系统信息。这个目录的内容不在硬盘上而是在内存里，我们也可以直接修改里面的某些文件
 ```
 
 
 
-```markdown
-- Mac OS
-/Applications 大多数用户应用程序
-/Users 所有常规用户主目录的默认位置（包含文档，图片，电影，桌面等的子目录）
-/Library 包含应用程序库，文档和应用程序设置
+### /usr
 
-
-/bin 包含任何用户可以执行的二进制命令
-/dev 包含用于引用系统设备的设备文件
-/etc 包含大多数系统配置
-
-/Network 包含来自远程系统的库和信息
-/Private 通常不应查看的私有操作系统信息
-/sbin 包含超级用户（root）可执行文件
-/System 包含大多数系统配置和操作系统文件
-/tmp 包含应用程序使用的临时文件
-
-
-/var 包含日志文件和假脱机/内容目录
-/Volumes 包含用于安装设备的子目录
-/usr 系统级目录
-/usr/local 用户级目录
-/usr/local/opt 用户级的程序目录
-/usr/local/src 用户级的源码目录
-/usr/local/etc 用户级的配置文件
-/usr/local/var 用户级的数据、日志文件
+```
+/usr/bin：系统用户使用的应用程序
+/usr/sbin：超级用户使用的比较高级的管理程序和系统守护程序。
+/usr/src：内核源代码默认的放置目录
+/usr/local：用户级的程序目录，可以理解为Windows下的 C:/Progrem Files/ 目录
 ```
 
 
@@ -196,7 +207,7 @@ service ssh start      # way2
 
 Load Average 算法：
 
-每隔5秒钟检查一次活跃的进程数，
+每隔5秒钟检查一次活跃的进程数
 
 
 
@@ -218,15 +229,15 @@ Host-only模式：通过VMnet1虚拟网卡与主机通信，且仅能与主机�
 
 https://blog.csdn.net/mountzf/article/details/51735691
 
-### ttySn
+### 基本概念
+
+- tty：tty一词源于 teletypes，指代终端
+
+- pty：虚拟终端（pseudo-tty）
+
+- pst：pseudo-terminal slave 是 pty 的实现方法，和 ptmx（pseudo-terminal master）配合使用实现 pty
 
 
-
-### pty
-
-
-
-### tty
 
 
 
@@ -234,7 +245,195 @@ https://blog.csdn.net/mountzf/article/details/51735691
 
 # Linux命令🦄
 
-## 处理命令🐦  
+## Mac OS 命令🐦 
+
+### open
+
+```
+
+```
+
+
+
+### launchctl
+
+launchctl是 Mac OS 下的一个统一的服务管理框架，可以启动、停止和管理进程、应用程序、脚本等。
+
+```markdown
+~/Library/LaunchAgents         由用户自己定义的任务项
+/Library/LaunchAgents          由管理员为用户定义的任务项
+/Library/LaunchDaemons         由管理员定义的守护进程任务项
+/System/Library/LaunchAgents   由 Mac OS 为用户定义的任务项
+/System/Library/LaunchDaemons  由 Mac OS 定义的守护进程任务项
+```
+
+
+
+```shell
+launchctl list  # 查看任务列表
+```
+
+
+
+### brew
+
+👉 安装 homebrew
+
+```shell
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+```
+
+
+
+👉  brew 文件目录
+
+`brew install` 安装的软件，会下载到 `/usr/local/Cellar`
+
+`brew cask install` 安装的软件，会下载到 `/usr/local/Caskroom`
+
+安装后的软件中bin目录下的可执行文件，会以软链接的形式存放在 `/usr/local/bin`
+
+安装后的软件会以硬链接的方式存放在 `/usr/local/opt` 
+
+
+
+
+
+👉 brew search
+
+```sh
+# 搜索
+brew search wget
+
+# 被 // 包围则表示正则比导师
+brew search /wge*/
+```
+
+
+
+👉 `brew autoremove`
+
+卸载仅作为其他 formula 依赖的 formula ，且这些 formula 不被任何其他 formula 依赖。
+
+```sh
+brew autoremove
+```
+
+
+
+
+
+👉 `brew services`
+
+Manage background services with macOS launchctl daemon manager.
+
+If sudo is passed, operate on /Library/LaunchDaemons (started at boot).
+Otherwise, operate on ~/Library/LaunchAgents (started at login).
+
+```sh
+# List all managed services for the current user (or root).
+brew services [list]:
+    
+# Run the service formula without registering to launch at login (or boot).
+brew services run (formula|--all):
+    
+# Start the service formula immediately and register it to launch at login (or boot).
+brew services start (formula|--all):
+    
+
+# Stop the service formula immediately and unregister it from launching at login (or boot).
+brew services stop (formula|--all):
+
+# Stop (if necessary) and start the service formula immediately and register it to launch at login (or boot).
+brew services restart (formula|--all):
+
+```
+
+
+
+👉 brew tap
+
+如果你在核心仓库没有找到你需要的软件,那么你就需要安装第三方的仓库去安装你需要的软件
+
+`tap` 命令的仓库源默认来至于`Github`，但是这个命令也不限制于这一个地方
+
+```sh
+# brew tap 可以为 brew 的软件的跟踪更新，安装添加更多的 tap formulae
+
+# 没有参数会自动更新已经存在的 tap 并列出当前已经 tapped 的仓库
+$ brew tag  
+
+  homebrew/cask
+  homebrew/core
+  homebrew/services
+  iina/mpv-iina
+  pivotal/tap
+```
+
+
+
+👉 简单命令
+
+```sh
+brew list             # List all installed formulae and casks
+
+brew update           # Fetch the newest version of Homebrew and all formulae from GitHub
+
+brew help [COMMAND]   # Display help
+
+brew home thefuck     # open a formula or cask's homepage in a browser
+
+brew info thefuck     # Display brief statistics for your Homebrew installation
+
+brew desc thefuck     # Display formula's name and one-line description
+
+brew upgrade thefuck  # Upgrade outdated casks and formulae
+
+brew doctor           # Check your system for potential problems
+
+brew outdated   # List installed casks and formulae that have an updated version available
+
+brew cleanup    # Remove stale lock files and outdated downloads for all formulae and casks, and remove old versions of installed formulae
+
+brew update-reset    # Fetch and reset Homebrew and all tap repositories (or any specified repository) using `git` to their latest `origin/HEAD`
+```
+
+
+
+👉 常用参数
+
+搭配 COMMAND
+
+```
+-d, --debug                      Display any debugging information.
+-q, --quiet                      Make some output more quiet.
+-v, --verbose                    Make some output more verbose.
+-h, --help                       Show this message.
+```
+
+不搭配任何 COMMAND
+
+```
+--cache                   -- Display Homebrew's download cache
+--caskroom                -- Display Homebrew's Caskroom path
+--cellar                  -- Display Homebrew's Cellar path
+--env                     -- Summarise Homebrew's build environment as a plain list
+--prefix                  -- Display Homebrew's install path
+--repository              -- Display where Homebrew's git repository is located
+--version                 -- Print the version numbers of Homebrew, Homebrew/homebrew-core and Homebrew/homebrew-cask (if tapped) to standard outp
+```
+
+
+
+👉 镜像设置
+
+https://mirror.tuna.tsinghua.edu.cn/help/homebrew/
+
+
+
+
+
+## 处理命令🐦 
 
 ### ls
 
@@ -352,7 +551,7 @@ touch [文件名]
 
 
 
-### cat (tac)
+### cat /tac
 
 功能描述：显示文件内容
 
@@ -364,7 +563,7 @@ cat -n /etc/profile
 
 
 
-### head (tail)
+### head/tail
 
 ```
 head [文件名]  // 显示文件前面几行
@@ -374,7 +573,9 @@ head [文件名]  // 显示文件前面几行
 
 
 
-### more
+### more/less
+
+less 与 more 类似，但使用 less 可以随意浏览文件，而 more 仅能向前移动，却不能向后移动，而且 less 在查看之前不会加载整个文件。
 
 
 
@@ -803,10 +1004,22 @@ chmod [-cfRv][--help][--reference=<参考文件或目录>][--version][文件或�
 
 
 
+- `r`：读取权限，数字代号为`4`；
+- `w`：写入权限，数字代号为`2`；
+- `x`：执行或切换权限，数字代号为`1`；
+- `-`：不具任何权限，数字代号为`0`；
+- `s`：当文件被执行时，根据`who`参数指定的用户类型设置文件的`setuid`或者`setgid`权限。
+
+
+
+
+
 示例：
 
 ```sh
-chmod a+w /etc/sudoers  // 对所有用户增加 w 权限
+chomd 777 file  # 添加所有用户的权限
+chmod a+w file  # 对所有用户增加w权限
+chmod 670 file  # 取消所有者的执行权限及赋予其他用户的所有权限
 ```
 
 
@@ -1110,6 +1323,33 @@ m： 设置mark
 
 
 
+👉 多section查看
+
+对于有多个 section 的 man 手册，会按照预先默认的搜索路径和顺序去搜索文档，可以指定 section 去搜索内容。
+
+```
+man 5 passwd
+```
+
+
+
+section 描述：
+
+```
+1	Executable programs or shell commands  shell命令
+2	System calls (functions provided by the kernel)  系统调用函数
+3	Library calls (functions within program libraries) 标准库函数
+4	Special files (usually found in /dev) 特殊文件，通常是在/dev目录下的文件
+5	File formats and conventions eg /etc/passwd  对一些文件进行解释
+6	Games 游戏
+7	Miscellaneous (including macro packages and conventions), e.g. man(7),groff(7) 宏命令包、协定等
+8	System administration commands (usually only for root) 只有系统管理员可以使用的命令
+9	Kernel routines [Non standard] 内核相关的文件
+
+```
+
+
+
 ### help
 
 bash 命令
@@ -1253,8 +1493,6 @@ State：The state of the socket.
 
 
 
-
-
 ## 进程管理命令🐦
 
 ### jps
@@ -1321,6 +1559,7 @@ pkill 是 ps 命令和 kill 命令的结合，用来杀死指定进程
 pkill [OPTIONS] <PATTERN>
 
 		-F pidfile：严格匹配pid
+		-t, --terminal：指定终端，无需/dev/前缀
 
 
 pkill -kill -t pts/1  # 强制用户下线
@@ -1403,24 +1642,6 @@ systemctl [OPTIONS...] COMMAND [NAME...]
 
 
 
-
-### launchctl
-
-launchctl是 Mac OS 下的一个统一的服务管理框架，可以启动、停止和管理进程、应用程序、脚本等。
-
-```markdown
-~/Library/LaunchAgents         由用户自己定义的任务项
-/Library/LaunchAgents          由管理员为用户定义的任务项
-/Library/LaunchDaemons         由管理员定义的守护进程任务项
-/System/Library/LaunchAgents   由 Mac OS 为用户定义的任务项
-/System/Library/LaunchDaemons  由 Mac OS 定义的守护进程任务项
-```
-
-
-
-```shell
-launchctl list  # 查看任务列表
-```
 
 
 
@@ -1624,174 +1845,52 @@ D、配置文件位置：/etc
 E、lib文件位置：/usr/lib
 ```
 
-```shell
+
+
+👉 安装
+
+```sh
 # 刷新存储库索引
 apt update  
-# 自动删除不需要的包
-apt autoremove 
-# 清除下载的安裝包
-apt autoclean  
-# 移除软件包及配置文件
-apt purge  
+
 # 安装软件包
 apt install  
 ```
 
 
 
-### brew
-
-👉 安装 homebrew
-
-```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-```
-
-
-
-👉  brew 文件目录
-
-`brew install` 安装的软件，会下载到 `/usr/local/Cellar`
-
-`brew cask install` 安装的软件，会下载到 `/usr/local/Caskroom`
-
-安装后的软件中bin目录下的可执行文件，会以软链接的形式存放在 `/usr/local/bin`
-
-安装后的软件会以硬链接的方式存放在 `/usr/local/opt` 
-
-
-
-
-
-👉 brew search
+👉 卸载
 
 ```sh
-# 搜索
-brew search wget
+# 移除与packagename相关联的所有二进制文件，但是不会移除与之相关联的配置文件或数据文件（configuration or data files）
+# 同样也不会移除packagename所依赖的包
+apt remove packagename
 
-# 被 // 包围则表示正则比导师
-brew search /wge*/
+# 移除与包packagename相关联的所有文件
+# 该命令不会移除packagename所依赖的包，也不会移除位于用户home目录中的与packagename相关联的配置文件或数据文件
+apt purge  
+
+# 卸载当前系统中的所有孤立的包
+apt autoremove 
+
+# 清除下载的安裝包
+apt autoclean  
+
+# 模拟卸载pacagename包，但是不会真的卸载
+apt -s remove packagename
 ```
 
 
 
-👉 `brew autoremove`
 
-卸载仅作为其他 formula 依赖的 formula ，且这些 formula 不被任何其他 formula 依赖。
+
+👉 展示
 
 ```sh
-brew autoremove
+apt list --install # 列出所有已经安装的包
 ```
 
 
-
-
-
-👉 `brew services`
-
-Manage background services with macOS launchctl daemon manager.
-
-If sudo is passed, operate on /Library/LaunchDaemons (started at boot).
-Otherwise, operate on ~/Library/LaunchAgents (started at login).
-
-```sh
-# List all managed services for the current user (or root).
-brew services [list]:
-    
-# Run the service formula without registering to launch at login (or boot).
-brew services run (formula|--all):
-    
-# Start the service formula immediately and register it to launch at login (or boot).
-brew services start (formula|--all):
-    
-
-# Stop the service formula immediately and unregister it from launching at login (or boot).
-brew services stop (formula|--all):
-
-# Stop (if necessary) and start the service formula immediately and register it to launch at login (or boot).
-brew services restart (formula|--all):
-
-```
-
-
-
-👉 brew tap
-
-如果你在核心仓库没有找到你需要的软件,那么你就需要安装第三方的仓库去安装你需要的软件
-
-`tap` 命令的仓库源默认来至于`Github`，但是这个命令也不限制于这一个地方
-
-```sh
-# brew tap 可以为 brew 的软件的跟踪更新，安装添加更多的 tap formulae
-
-# 没有参数会自动更新已经存在的 tap 并列出当前已经 tapped 的仓库
-$ brew tag  
-
-  homebrew/cask
-  homebrew/core
-  homebrew/services
-  iina/mpv-iina
-  pivotal/tap
-```
-
-
-
-👉 简单命令
-
-```sh
-brew list             # List all installed formulae and casks
-
-brew update           # Fetch the newest version of Homebrew and all formulae from GitHub
-
-brew help [COMMAND]   # Display help
-
-brew home thefuck     # open a formula or cask's homepage in a browser
-
-brew info thefuck     # Display brief statistics for your Homebrew installation
-
-brew desc thefuck     # Display formula's name and one-line description
-
-brew upgrade thefuck  # Upgrade outdated casks and formulae
-
-brew doctor           # Check your system for potential problems
-
-brew outdated   # List installed casks and formulae that have an updated version available
-
-brew cleanup    # Remove stale lock files and outdated downloads for all formulae and casks, and remove old versions of installed formulae
-
-brew update-reset    # Fetch and reset Homebrew and all tap repositories (or any specified repository) using `git` to their latest `origin/HEAD`
-```
-
-
-
-👉 常用参数
-
-搭配 COMMAND
-
-```
--d, --debug                      Display any debugging information.
--q, --quiet                      Make some output more quiet.
--v, --verbose                    Make some output more verbose.
--h, --help                       Show this message.
-```
-
-不搭配任何 COMMAND
-
-```
---cache                   -- Display Homebrew's download cache
---caskroom                -- Display Homebrew's Caskroom path
---cellar                  -- Display Homebrew's Cellar path
---env                     -- Summarise Homebrew's build environment as a plain list
---prefix                  -- Display Homebrew's install path
---repository              -- Display where Homebrew's git repository is located
---version                 -- Print the version numbers of Homebrew, Homebrew/homebrew-core and Homebrew/homebrew-cask (if tapped) to standard outp
-```
-
-
-
-👉 镜像设置
-
-https://mirror.tuna.tsinghua.edu.cn/help/homebrew/
 
 
 
@@ -1809,11 +1908,32 @@ $ apt-get install wget # 安装wget
 
 
 
+### aptitude
+
+aptitude 与 apt 一样，是 Debian 及其衍生系统中功能极其强大的包管理工具。
+
+与 apt 不同的是，aptitude 在处理依赖问题上更佳，例如，aptitude 在删除一个包时，会同时删除本身所依赖的包。
+
+```sh
+$ aptitude remove packagename
+$ aptitude purge packagename
+```
+
+
+
 ### dpkg
 
-dpkg 是 Debian package 的简写，为 Debian 操作系统 专门开发的套件管理系统，用于软件的安装，更新和移除。
+dpkg（Debian package），为 Debian 操作系统 专门开发的套件管理系统，用于软件的安装，更新和移除。
 
-所有源自"Debian" 的 Linux 的发行版都使用 dpkg，例如 "Ubuntu"
+所有源自"Debian" 的 Linux 的发行版都使用 dpkg，例如 Ubuntu
+
+apt 基于dpkg，侧重于远程包的下载和依赖管理，相当于 dpkg 的前端。
+
+1. dpkg是用来安装.deb文件，但不会解决模块的依赖关系，且不会关心 ubuntu 的软件仓库内的软件，可以用于安装本地的deb文件。
+
+2. apt 会解决和安装模块的依赖问题，并会咨询软件仓库，但不会安装本地的 deb 文件，apt是建立在 dpkg 之上的软件管理工具。
+
+dpkg 绕过 apt 包管理数据库对软件包进行操作，所以用 dpkg 安装过的软件包用 apt 可以再安装一遍，系统不知道之前安装过了，将会覆盖之前 dpkg 的安装，所以 ubuntu 最好不要用 dpkg
 
 ```sh
 dpkg [option...] action
@@ -1825,6 +1945,10 @@ action：
 		
 option：
 ```
+
+
+
+
 
 
 
@@ -1851,7 +1975,7 @@ Ctrl + d + z  # 把当前session放到后台执行
 
 ### history
 
-```
+```sh
 history [选项] [历史命令保存文件]
 		-c：  清空历史命令 （不要轻易使用）
 		-w： 把缓存中的历史命令写入历史命令保存文件  ~/.bash_history （正常情况下账号登出后才会保存）
@@ -1860,6 +1984,107 @@ history [选项] [历史命令保存文件]
 历史命令默认保存1000条，可以在/etc/profile中更改： `HISTSIZE=1000`
 
 
+
+## 远程命令🐦
+
+### ssh
+
+一般情况下，安装好的 Ubuntu 系统中默认是只安装了 openssh-client，此时只能通过此系统连接访问其他系统，但不具有让其他系统访问的权限。
+
+在终端查看 ssh 进程，输入 `ps -e|grep ssh` ，如果有安装 openssh-client 只会出现 ssh -agent，不会出现 sshd
+
+
+```sh
+sudo apt install openssh-client # 本地主机运行此条，实际上通常已经默认安装
+sudo apt install openssh-server # 服务器运行此条命令安装
+
+# 启动ssh，两种方式都可
+service ssh start
+/etc/init.d/ssh start  
+```
+
+
+
+然后就可以用 ssh 连接目标主机了
+
+```sh
+ssh <username>@<IP address or domain name>
+ssh -X <username>@<IP address or domain name> # 如果需要调用图形界面程序
+```
+
+以上是使用密码登录，还可以使用公钥登录
+
+
+
+
+
+### scp
+
+ scp（secure copy）是 linux 系统下基于 ssh 登陆进行安全的远程文件拷贝命令，scp 是加密的，rcp 是不加密的，scp 是 rcp 的加强版。
+
+👉 本机上传到服务器
+
+```sh
+scp /Users/yorua/.ssh/id-ed25519-tencentcloud.pub ubuntu@124.223.214.212:/home/ubuntu/.ssh/authorized_keys
+```
+
+
+
+👉 服务器上传到本机
+
+```
+scp  ubuntu@124.223.214.212:/home/ubuntu/.ssh/authorized_keys /Users/yorua/.ssh/id-ed25519-tencentcloud.pub
+```
+
+
+
+### sftp
+
+sftp 是一个交互式文件传输程式，它类似于 ftp, 但它进行加密传输，比 ftp 有更高的安全性。
+
+👉 安装
+
+```shell
+# 安装
+sudo apt install vsftpd
+
+# 启动sftp，两种方式都可
+service ssh start
+/etc/init.d/vsftpd  restart
+```
+
+
+
+👉 连接主机
+
+```
+sftp ubuntu@124.223.214.212
+```
+
+
+
+👉 处理
+
+```sh
+sftp> lpwd  # 本机工作目录
+Local working directory: /Users/yorua
+
+sftp> lcd opt
+sftp> lpwd
+Local working directory: /Users/yorua/opt
+```
+
+
+
+👉 上传与下载
+
+```sh
+sftp> get aaa.txt /Users/yorua/
+Fetching /home/ubuntu/aaa.txt to /Users/yorua/aaa.txt
+
+sftp> put /Users/yorua/bbb.txt  /home/ubuntu
+Uploading /Users/yorua/bbb.txt to /home/ubuntu
+```
 
 
 
@@ -1895,6 +2120,8 @@ source ~/.zshrc
 
 
 
+
+
 ## 键盘命令🐦
 
 ```
@@ -1911,274 +2138,6 @@ Ctrl + k  // 清除从光标到行尾的全部内容
 
 
 
-
-# Shell编程🦄
-
-## shell概述
-
-Shell是一个命令行解释器，它为用户提供了一个向Linux内核发送请求以便运行程序的界面系统级程序，用户可以用Shell启动、挂起、停止甚至是编写一些程序。
-
-Shell是一个功能相当强大的编程语言，易编写，易调试，灵活性较强。Shel是解释执行的脚本语言，在Shel中可以直接调用 Linux系统命令，linux可执行的shell可以根据`/etc/shells`进行查询。
-
-
-
-## Shell脚本的执行方式
-
-## Bash的基本功能
-
-### alias命令别名
-
-写入环境变量中的别名可以永久生效
-
-```shell
-alias # 查询命令别名
-alias[别名]=['原命令']    # 设定命令别名
-unalias [别名] # 删除别名
-```
-
-命令执行时顺序
-
-- 第一顺位执行用绝对路径或相对路径执行的命令。
-
-- 第二顺位执行别名。
-
-- 第三顺位执行Bash的内部命令（例如cd）
-
-- 第四顺位执行按照$PATH环境变量定义的目录查找顺序找到的第一个命令。
-
-
-
-### 管道符
-
-命令1的正确输出作为命令2的操作对象
-
-```shell
-命令1|命令2
-ps -e|grep mysql
-```
-
-
-
-### 输出重定向
-
-```markdown
-- 标准输出重定向
-命令 > 文件  # 以覆盖的方式把命令的正确输出输出到指定的文件或设备当中
-- 标准错误输出重定向
-错误命令2>文件
-错误命令2>>文件
-- 正确输出和错误输出同时保存
-
-```
-
-
-
-```shell
-echo 'export PATH="/usr/local/opt/redis@3.2/bin:$PATH"' >> ~/.zshrc   # 通过输出重定向写入环境变量
-```
-
-
-
-## Bash变量
-
-变量是计算机内存的单元，其中存放的值可以改变。当Shell脚本需要保存一些信息时，如一个文件名或是一个数字，就把它存放在一个变量中。每个变量有一个名字，所以很容易引用它。使用变量可以保存有用信息，使系统获知用户相关设置，变量也可以用于保存暂时信息。
-
-Bash中变量的默认类型为字符串型，如果要进行数值运算，则必须制定变量类型为数值型。
-
-### 本地变量
-
-**定义变量**
-
-```shell
-name=kiana
-```
-
-**调用变量**
-
-```shell
-echo $name  # kiana
-```
-
-**叠加变量**
-
-```shell
-name="$name"kiana
-echo $name  # kianakiana
-```
-
-**查看变量**
-
-```shell
-set
-```
-
-**删除变量**
-
-```shell
-unset name
-```
-
-### 环境变量
-
-用户自定义变量只在当前的Shell中生效，而环境变量会在当前Shell和这个Shell的所有子Shell当中生效。如果把环境变量写入相碰的配置文件，那么这个环境变量就会在所有的Shell中生效
-
-声明环境变量
-
-```shell
-export 变量名=变量值
-```
-
-查询环境变量
-
-```
-env
-```
-
-删除环境变量
-
-```shell
-unset 变量名
-```
-
-PATH变量叠加
-
-```shell
-PATH = "$PATH":/root  # 将/root写入PATH 临时生效
-```
-
-
-
-## 环境变量配置
-
-环境变量配置文件中主要是定义对系统的操作环境生效的系统默认环境变量，比如 PATH、HISTSIZE、PSI、HOSTNAME 等默认环境变量。
-
-
-
-
-
-### 环境变量配置文件
-
-系统中主要有以下五类环境变量配置文件
-
-```shell
-# 对系统中所有用户生效
-/etc/profile
-/etc/profile.d/*.sh  # 即/etc/profile.d目录下所有以.sh结尾的文件
-/etc/bashrc
-
-# 对当前用户生效
-~/.bash_profile
-~/.bashrc
-```
-
-`/etc/profile` 定义了登录（login shell）情况下的环境变量配置
-
-`/etc/bashrc` 定义了非登录（nologin shell）情况下的环境变量配置
-
-
-
-### 登录Shell
-
-#### Login Shell
-
-Login Shell 就是进入 Shell 时是需要输用户名密码的，例如启动图形界面最后一步需要你输入用户名密码，只有输入正确，才能进入桌面，进入的就是一个 Login Shell 。
-
-读取配置文件的顺序：`/etc/profile -> /etc/bashrc -> ~/.bashrc -> ~/.bash_profile`
-
-#### Nologin Shell
-
-Nologin Shell 就是不需要输入密码就能进入的 Shell 。
-
-读取配置文件的顺序：`/etc/profile -> /etc/bashrc -> ~/.bashrc`
-
-
-
-### 配置文件的优先级
-
-![](http://store.secretcamp.cn/uPic/env2021032108532316162880031tuVEK1tuVEK.png)
-
-### 其他环境变量
-
-注销时生效的环境变量
-
-```
-~/.bash_logout
-```
-
-历史命令保存文件
-
-```
-~/.bash_history
-```
-
-
-
-### Shell登录信息
-
-本地终端欢迎信息
-
-```shell
-vim /etc/issue
-```
-
-| 转义符 | 作用                             |
-| ------ | -------------------------------- |
-| \d     | 显示当前系统日期                 |
-| \s     | 显示操作系统名称                 |
-| \l     | 显示登录的终端号，这个比较常用。 |
-| \m     | 显示硬件体系结构，如i386、i686等 |
-| \n     | 显示主机名                       |
-| \o     | 显示域名                         |
-| \r     | 显示内核版本                     |
-| \t     | 显示当前系统时间                 |
-| \u     | 显示当前登录用户的序列号         |
-
-远程终端欢迎信息
-
-```shell
-vim /etc/issue.net
-```
-
-- 转义符在 `/etc/issue.net` 文件中不能使用
-- 是否显示此欢迎信息，由ssh的配置文件 `/etc/ssh/sshd_config` 决定，加入 `Banner /etc/issue.net` 才能显示，并重启SSH服务
-
-
-
-**登录后欢迎信息**
-
-```shell
-vim /etc/motd
-```
-
-不管是本地登录，还是远程登录，都可以显示此欢迎信息
-
-
-
-## 转义字符
-
-1. 转义字符「 \ 」
-
-   如果将 \ 放到特殊字符前面，shell 就忽略这些特殊字符的原有含义，把它们当作普通字符对待
-
-2. 单引号
-
-   如果将字符串放到⼀对单引号之间，那么字符串中所有字符的特殊含义将被忽略
-
-3. 双引号
-
-   双引号的引用与单引号基本相同，包含在双引号内的大部分特殊字符可以当作普通字符处理，但是仍有一些特殊字符即使⽤双引号括起来，也仍然保留自己的特殊含义，例如 「 $ 」、「 \ 」 和 「 ` 」 
-
-
-
-## shell命令
-
-### bash
-
-### sh
-
-```shell
-sh -c  # 让 bash 将一个字串作为完整的命令来执行
-```
 
 
 
@@ -2396,42 +2355,108 @@ ab mymail 1120053798@qq.com  // 在脚本中将[a空格回车]替换为b
 
 
 
+## 插件
+
+vim 插件是一个特殊的文件夹，其主要的结构如下：
+
+- autoload/：插件公共代码，vim 在**执行 viml 的时候**自动载入。`:h autoload`
+- colors/：配色主题定义文件。`:h colorscheme`
+- ftplugin/：专用代码，以**文件类型加下划线**开头，遇到对应文件自动执行。`:h write-filetype-plugin`
+- plugin/：通用代码，自动执行。`:h write-plugin`
+- syntax/：语法高亮定义文件。`:h mysyntaxfile`
+
+一般的插件都有 `autoload` 和 `plugin` 两个目录，简单的插件可能只有一个 `plugin` 目录，支持多种语言的插件会有一个 `ftplugin` 目录。
 
 
 
 
 
+# 日志管理🦄
 
-# 远程连接🦄
-
-## ssh
-
-一般情况下，安装好的 Ubuntu 系统中默认是只安装了 openssh-client，此时只能通过此系统连接访问其他系统，但不具有让其他系统访问的权限。
-
-在终端查看 ssh 进程，输入 `ps -e|grep ssh` ，如果有安装 openssh-client 只会出现 ssh -agent，不会出现 sshd
-
+## rsyslogd
 
 ```sh
-# 安装
-sudo apt install openssh-server
-
-# 启动ssh，两种方式都可
-service ssh start
-/etc/init.d/ssh start  
+# 查看进程是否存在
+ps -aux | grep rsyslogd
 ```
 
 
 
-## sftp
+## 常用日志文件
 
-```shell
-# 安装
-sudo apt install vsftpd
-
-# 启动sftp，两种方式都可
-service ssh start
-/etc/init.d/vsftpd  restart
 ```
+/var/log/cron：记录定时任务相关
+/var/log/cups：记录打印信息的日志
+/var/log/dmesg：记录系统在开机时内核自检的信息
+/var/log/lastlog：记录系统中所有用户最后一次的登录时间的日志，这个文件是二进制文件，用 lastlog 命令查看
+/var/log/maillog：记录邮件信息
+/var/log/secure：记录验证和授权方面的信息，即ssh、su、sudo之类的信息
+/var/log/wtmp：永久记录所有用户的登录、注销信息，二进制文件，用 last 命令查看
+/var/log/btmp：记录错误登录的日志，二进制文件，用 lastb 命令查看
+/var/log/utmp：记录当前已经登录的用户的信息，用 w、who命令查看
+```
+
+
+
+## 日志配置文件
+
+日志记录默认格式：
+
+```
+日期时间 主机 服务名/程序名 具体信息
+```
+
+
+
+配置文件：`/etc/rsyslog.d/50-default.conf`
+
+格式服从  `服务名称[连接符号] 日志等级    日志记录位置`
+
+```
+auth,authpriv.*                 /var/log/auth.log
+*.*;auth,authpriv.none          -/var/log/syslog
+cron.*                          /var/log/cron.log
+#daemon.*                       -/var/log/daemon.log
+kern.*                          -/var/log/kern.log
+#lpr.*                          -/var/log/lpr.log
+mail.*                          -/var/log/mail.log
+#user.*                         -/var/log/user.log
+```
+
+
+
+### 连接符号
+
+```
+*：  全部记录
+.：  只要比后面的等级高的（包含该等级）日志都记录，例如cron.info表示只要比info等级高的都记录
+.=： 只记录所需等级的日志
+.!： 不等于，也就是除了该等级的日志外，其他等级的日志都记录
+```
+
+
+
+### 日志等级
+
+debug：调试信息
+
+info：通知信息
+
+notice：普通信息
+
+warning：警告信息
+
+err：错误信息
+
+crit：临界信息
+
+alert：警告信息
+
+emerg：寄了
+
+
+
+### logrotate
 
 
 
@@ -2439,25 +2464,49 @@ service ssh start
 
 # 效率工具🦄
 
+## neovim
+
+
+
 ## onmyzsh
 
 官方网址：https://ohmyz.sh
 
 github：https://github.com/ohmyzsh/ohmyzsh
 
-```
-1. 安装zsh
+👉 准备
+
+```sh
+# 安装zsh
 sudo apt install zsh
 
-2. 修改默认shell
+# 修改默认shell
 chsh -s /bin/zsh
 
-3. 配置密码文件
+# root配置（如果要改root用户）
 sudo vim /etc/passwd
 将 root 行的 /bin/bash 改成 /bin/zsh
+```
 
-4. 安装onmyzsh
+
+
+👉 自动安装
+
+```sh
+# 安装onmyzsh
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+
+
+
+👉手动安装
+
+```sh
+git clone https://github.com/robbyrussell/oh-my-zsh.git
+
+cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
+
+source ~/.zshrc
 ```
 
 
@@ -2468,9 +2517,9 @@ onmyzsh 插件安装：
 
 需要安装插件本身的：
 
-- zsh-autosuggestions
+- [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)：不补全
 
-- [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
+- [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)：高亮
 - [autojump](https://github.com/wting/autojump#installation)
 - [thefuck](https://github.com/nvbn/thefuck)
 
@@ -2478,9 +2527,9 @@ onmyzsh 插件安装：
 
 可以直接配置使用：
 
-- ufw
-- colored-man-pages
-- extract
+- ufw：补全
+- colored-man-pages：彩色man手册
+- extract：新增一个无脑解压缩命令
 
 
 
@@ -2492,7 +2541,7 @@ github：https://github.com/nvbn/thefuck
 
 
 
-```
+```sh
 Mac os：
 
 brew install thefuck
@@ -2501,7 +2550,7 @@ Linux：
 
 sudo apt update
 sudo apt install python3-dev python3-pip python3-setuptools
-sudo pip3 install thefuck
+sudo pip3 install thefuck --user
 ```
 
 
@@ -2535,6 +2584,14 @@ echo '. /usr/share/autojump/autojump.sh' >> ~/.bashrc
 
 
 
+## tldr
+
+tldr 全称 too long, don’t read.
+
+```sh
+pip3 install tldr
+```
+
 
 
 ## spacevim
@@ -2555,6 +2612,10 @@ curl -sLf https://spacevim.org/cn/install.sh | bash -s -- -h
 
 用户配置文件：`~/.SpaceVim.d/init.toml`
 
+插件位置：`~/.cache/vimfiles/repos/github.com`
+
+
+
 
 
 ## cowsay
@@ -2571,6 +2632,141 @@ sudo apt-get install cowsay
 
 
 
+
+## cron
+
+cron 用于设置周期性被执行的指令
+
+crontab 是 UNIX 系统下定期执行任务的触发器。用户把要定期执行的任务记录在这个文件下面，然后crond定期的去检查这个定期执行列表，有要执行的工作时便自动执行。
+
+默认情况下只有 root 用户才能使用 cron，其他用户需在 `/etc/cron.allow` 以及 `/etc/cron.deny` 中配置。
+
+```
+usage:	crontab [-u user] file
+	crontab [ -u user ] [ -i ] { -e | -l | -r }
+		(default operation is replace, per 1003.2)
+	-e	(edit user's crontab)
+	-l	(list user's crontab)
+	-r	(delete user's crontab)
+	-i	(prompt before deleting user's crontab)
+```
+
+
+
+👉 基本用法
+
+```
+crontab -e  # 编辑定时任务
+```
+
+
+
+👉 cron 表达式
+
+[表达式生成](https://www.bejson.com/othertools/cron/)
+
+```
+*  *  * *  *   command
+分 时 天 月 周   命令
+```
+
+
+
+👉 开启 cron 日志
+
+1. 打开rsy
+
+```
+sudo vim /etc/rsyslog.d/50-default.conf
+```
+
+2. 取消 `cron.*  /var/log/cron.log` 的注释
+3. 重启 rsyslog
+
+```
+sudo service rsyslog  restart
+```
+
+4. 查看日志
+
+```
+# cron日志
+less /var/log/cron.log
+
+# 系统日志
+tail /var/log/syslog
+```
+
+
+
+👉 cron 的输出
+
+cron 会通过邮件输出信息
+
+
+
+
+
+👉 注意事项
+
+1. crontab 由于 `.bashrc` 不会被执行，所以很多环境变量都没有，尽量用绝对路径
+
+2. crontab 的默认 SHELL 是 sh，一些命令例如 source 没有，可以指定 SHELL：
+
+   ```sh
+   SHELL=/bin/bash
+   */10 * * * * source /path/to/virtualenv/bin/activate && /path/to/build/manage.py some_command > /dev/null
+   ```
+
+   
+
+ 
+
+## mail
+
+安装后可以通过 mail 命令管理邮件
+
+```
+sudo apt install mailutils
+```
+
+输入 mail 不跟任何参数，然后输入 help 查看解释。
+
+```sh
+mail  # 默认信箱
+```
+
+
+
+```sh
+mail -f /home/ubuntu/mbox # 指定信箱
+```
+
+
+
+## postfix
+
+```sh
+# 安装postfix
+sudo apt install postfix
+
+# 重新配置postfix
+sudo dpkg-reconfigure postfix
+```
+
+
+
+## pigchaproxy
+
+[linux使用教程](http://101.34.95.10:8081/linux_tutorial)
+
+[官方地址](https://pigpigchacha.github.io/officialsite)
+
+```sh
+nohup pigchaproxy &
+
+export http_proxy=http://127.0.0.1:15732 && export https_proxy=http://127.0.0.1:15732
+```
 
 
 
@@ -2605,6 +2801,96 @@ https://www.cnblogs.com/iken/articles/4760705.html
 
 
 
-## 阿里云ESC git clone 慢
+## 允许用户使用root登录实例
+
+1. 修改 root 密码
+
+```
+sudo passwd root
+```
+
+
+
+2. 修改配置文件
+
+```
+sudo vi /etc/ssh/sshd_config 
+```
+
+ 找到 `#Authentication`，将 `PermitRootLogin` 参数修改为 `yes` 并保存
+
+
+
+3. 重启 ssh 服务
+
+```
+sudo service ssh restart
+```
+
+
+
+## 管理多个ssh
+
+1. 生成公钥和私钥
+
+```sh
+ssh-keygen -t ed25519 -C "1120053798@qq.com" -f  ~/.ssh/id-ed25519-tencentcloud
+ssh-keygen -t ed25519 -C "1120053798@qq.com" -f  ~/.ssh/id-ed25519-github
+```
+
+
+
+2. 配置config文件
+
+```
+Host *
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/id-ed25519-tencentcloud
+
+ 
+Host *
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/id-ed25519-github
+```
+
+
+
+3. 将 ssh 密钥添加到 ssh-agent
+
+```sh
+# 启动ssh-agent
+eval "$(ssh-agent -s)"
+
+# 将ssh私钥添加到ssh-agent并将密码存储在密钥链中。 
+ssh-add -K ~/.ssh/id-ed25519-tencentcloud
+ssh-add -K ~/.ssh/id-ed25519-github
+```
+
+
+
+
+
+## 使用ssh公钥登录服务器
+
+```sh
+# 登录远程服务器
+ssh ubuntu@124.223.214.212
+
+# 在服务器上创建.ssh文件夹,如果已经存在就跳过此步
+mkdir .ssh 
+
+# 为了保证.ssh文件夹的安全，应取消其他用户对文件夹的所有权限
+chmod 700 .ssh
+
+# 退出登录
+exit
+
+# 本地主机的公钥复制到远程服务器,作为已认证密钥
+scp /Users/yorua/.ssh/id-ed25519-tencentcloud.pub ubuntu@124.223.214.212:/home/ubuntu/.ssh/authorized_keys
+```
+
+
+
+## 阿里云 ESC git clone 慢
 
 https://blog.csdn.net/zwkkkk1/article/details/94476963

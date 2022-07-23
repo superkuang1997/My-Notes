@@ -1789,7 +1789,7 @@ public long mappingCount() {
 
 
 
-### 扩展问题
+### FAQ
 
 #### Node的hash字段有什么规律？
 

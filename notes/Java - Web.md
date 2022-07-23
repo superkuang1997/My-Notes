@@ -2,17 +2,17 @@
 
 ## Http服务器
 
-HTTP服务器本质上也是一种应用程序，它通常运行在服务器之上，绑定服务器的IP地址并监听某一个tcp端口来接收并处理HTTP请求，这样客户端（一般来说是IE，Firefox，Chrome等浏览器）就能够通过HTTP协议来获取服务器上的网页、文档、音频、视频等等资源。
+HTTP 服务器本质上也是一种应用程序，它通常运行在服务器之上，绑定服务器的 IP 地址并监听某一个 TCP 端口来接收并处理HTTP 请求，这样客户端就能够通过 HTTP 协议来获取服务器上的网页、文档、音频、视频等资源。
 
-Apache是指Apache软件基金会下的一个项目：[Apache HTTP Server Project](https://httpd.apache.org/)，是一个HTTP服务器。
+Apache 是指 Apache 软件基金会下的一个项目：[Apache HTTP Server Project](https://httpd.apache.org/)，是一个 HTTP 服务器。
 
 
 
 ## 静态资源和动态资源
 
-**静态资源：**客户端发送请求到web服务器，web服务器从内存在取到相应的文件，返回给客户端，客户端解析并渲染显示出来。
+- 静态资源：客户端发送请求到 web 服务器，web 服务器从内存在取到相应的文件，返回给客户端，客户端解析并渲染显示出来。
 
-**动态资源：**客户端请求的动态资源，先将请求交于web容器，web容器连接数据库，数据库处理数据之后，将内容交给web服务器，web服务器返回给客户端解析渲染处理。
+- 动态资源：客户端请求的动态资源，先将请求交于 web. 容器，web 容器连接数据库，数据库处理数据之后，将内容交给 web 服务器，web 服务器返回给客户端解析渲染处理。
 
 
 
@@ -20,11 +20,11 @@ Apache是指Apache软件基金会下的一个项目：[Apache HTTP Server Projec
 
 ## Tomcat
 
-[Apache Tomcat](http://tomcat.apache.org/) 是一个免费的开源的Web应用服务器，属于轻量级应用服务器，与Apache HTTP Server 相比，Tomcat 能够将动态资源返回到客户端，而 Apache HTTP Server 和 Nginx 用于返回静态资源。
+[Apache Tomcat](http://tomcat.apache.org/) 是一个免费的开源的 Web 应用服务器，属于轻量级应用服务器，与 Apache HTTP Server 相比，Tomcat 能够将动态资源返回到客户端，而 Apache HTTP Server 和 Nginx 主要用于返回静态资源。
 
-Apache HTTP Server 和 Nginx 本身不支持生成动态页面，但它们可以通过其他模块来支持（例如通过Shell、PHP、Python脚本程序来动态生成内容），如果想要使用 Java 程序来动态生成资源内容，使用 Apache HTTP Server 和 Nginx 则很难做到。
+Apache HTTP Server 和 Nginx 本身不支持生成动态页面，但它们可以通过其他模块来支持（例如通过Shell、PHP、Python 脚本程序来动态生成内容），如果想要使用 Java 程序来动态生成资源内容，使用 Apache HTTP Server 和 Nginx 则很难做到。
 
-Java Servlet 技术以及衍生的 Java Server Pages 技术可以让 Java 程序也具有处理 HTTP 请求并且返回动态内容的能力，Tomcat 正是支持运行「Servlet / JSP」应用程序的容器（Container）
+Java Servlet 技术以及衍生的 Java Server Pages （JSP）技术可以让 Java 程序也具有处理 HTTP 请求并且返回动态内容的能力，Tomcat 正是支持运行 Servlet 和 JSP 应用程序的容器（Container）
 
 Tomcat 运行在 JVM 之上，它和 HTTP 服务器一样，绑定 IP 地址并监听 TCP 端口，同时还包含以下功能：
 
@@ -32,9 +32,9 @@ Tomcat 运行在 JVM 之上，它和 HTTP 服务器一样，绑定 IP 地址并�
 
 2. 将 URL 映射到指定的Servlet进行处理
 
-3. 与 Servlet 程序合作处理 HTTP 请求 —— 根据 HTTP 请求生成 HttpServletRequest 对象并传递给 Servlet 进行处理，将Servlet 中的 HttpServletResponse 对象生成的内容返回给浏览器
+3. 与 Servlet 程序合作处理 HTTP 请求，根据 HTTP 请求生成 HttpServletRequest 对象并传递给 Servlet 进行处理，将 Servlet 中的 HttpServletResponse 对象生成的内容返回给浏览器
 
-Tomcat 常和 Nginx 配合使用：
+Tomcat 也常和 Nginx 配合使用：
 
 - 动静态资源分离：运用 Nginx 的反向代理功能分发请求，所有动态资源的请求交给 Tomcat，而静态资源的请求（图片、视频、CSS、JavaScript等）则直接由 Nginx 返回到浏览器，这样能大大减轻 Tomcat 的压力。
 
@@ -63,9 +63,9 @@ work：存放运行时的数据
 
 ## 项目部署
 
-1. 直接将项目放到 webapps 目录下
+1. 直接将项目放到 /webapps 目录下
 
-	- 简化部署：将项目打成一个 war 包，再将 war 包放置到 webapps目录下
+	- 简化部署：需要将项目打成一个 war 包，再将 war 包放置到 webapps目录下
 	- war 包会自动被解压缩
 
 2. 配置 `conf/server.xml` 文件
@@ -97,7 +97,7 @@ Java动态项目的目录结构：
 
 ### war 
 
-`war` 模式可以称为发布模式，将 web 工程先打成 war 包，再上传到服务器 
+war 模式可以称为发布模式，将 web 工程先打成 war 包，再上传到服务器
 
 应用程序上下文绝对路径：`/Users/yorua/opt/apache-tomcat-8.5.60/webapps/example/`
 
@@ -115,13 +115,15 @@ Java动态项目的目录结构：
 
 # Servlet🧀
 
-Servlet（Server Applet）：小服务程序或服务连接器，是用Java编写的服务器端程序。
+Servlet（Server Applet）：小服务程序或服务连接器，是用 Java 编写的服务器端程序。
+
+
 
 ## web.xml
 
 `web.xml` 作用是初始化配置信息。
 
-启动一个 web 项目的时候，web 容器（tomcat）会去读取它的配置文件 `web.xml `，读取 `<listener>` 和 `<context-param>`两个节点。 
+启动一个 web 项目的时候，web 容器（Tomcat）会去读取它的配置文件 `web.xml `，读取 `<listener>` 和 `<context-param>` 两个节点。 
 
 web 工程加载顺序：
 
@@ -153,18 +155,20 @@ ServletContext -> context-param -> listener -> filter -> servlet
 
 执行原理：
 
-1. 当服务器接受到客户端浏览器的请求后，会解析请求URL路径，获取访问的Servlet的资源路径
+1. 当服务器接受到客户端浏览器的请求后，会解析请求 URL 路径，获取访问的 Servlet 的资源路径
 
 2. 查找 `web.xml` 文件，是否有对应的`<url-pattern>`标签体内容。
 3. 如果有，则在找到对应的 `servlet-name`，再找到 `<servlet-class>` 全类名
 4. Tomcat 会将字节码文件加载进内存，并且创建其对象
 5. 调用该对象的方法
 
+以上配置中，客户端访问 /demo1 路径，对应名为demo1 的这个 Servlet ，而这个 Servlet 对应了 `ServletDemo01` 这个 Java 类，会调用该类的方法进行处理。
+
 
 
 ## @WebServlet
 
-Servlet 3.0 支持注解配置，无需再配置 `web.xml`
+从 Servlet 3.0 开始支持注解配置，可以代替  `web.xml`  的配置，在 Java 类上使用注解即可。
 
 ```java
 @WebServlet(urlPatterns = "/demo1")
@@ -183,17 +187,17 @@ public class ServlectDemo01 implements Servlet {
 
 ## IDEA集成Tomcat
 
-IDEA 会为每一个 tomcat 部署的项目单独建立一份配置文件
+IDEA 会为每一个 Tomcat 部署的项目单独建立一份配置文件
 
-项目分为工作空间项目和 tomcat 部署的 web 项目，tomcat 真正访问的是 "tomcat部署的web项目"，它对应了 "工作空间项目" 的 web 目录下的所有资源。
+IDEA 的项目分为工作空间项目和 Tomcat 部署的 web 项目，Tomcat 真正访问的是 “Tomcat 部署的 web 项目”，它对应了 “工作空间项目” 的 web 目录下的所有资源。
 
 
 
-## Servlet继承
+## Servlet继承体系
 
 - `GenericServlet`：将 Servlet 接口中其他的方法做了默认空实现，只将 `service()` 方法作为抽象。
 
-- `HttpServlet`：对 http 协议的一种封装，简化操作
+- `HttpServlet`：对 HTTP 协议的一种封装，简化操作
 
 ```
 Servlet（接口） ————> GenericServlet（抽象类） ————> HttpServlet（抽象类）
@@ -205,7 +209,7 @@ Servlet（接口） ————> GenericServlet（抽象类） ————> Ht
 
 ## ServletContext对象
 
-ServletContex代表整个web应用，可以和程序的容器（服务器）来通信
+ServletContex 代表整个 web 应用，可以和程序的容器（服务器）来通信
 
 获取：
 

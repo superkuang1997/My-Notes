@@ -31,7 +31,7 @@
 
 - 抢占式调度
 
-  优先让优先级高的线程使用 CPU，如果线程的优先级相同，那么会随机选择一个(线程随机性)，Java使用的为抢占式调度。
+  优先让优先级高的线程使用 CPU，如果线程的优先级相同，那么会随机选择一个（线程随机性），Java 使用的为抢占式调度。
 
 
 
@@ -539,7 +539,7 @@ Java 使用的线程调度方式是抢占式调度
 
 *Waiting* 描述为：「一个正在无限期等待另一个线程执行一个特别的唤醒动作的线程」处于这一状态。
 
-处于无限期等待的线程不会被cpu分配执行时间，它们要等待其他线程显示地唤醒。
+处于无限期等待的线程不会被分配 CPU 时间片，它们要等待被其他线程显式地唤醒。
 
 进入到 *Waiting* 的方法：
 
@@ -644,7 +644,7 @@ OpenJDK在 2018 年创建了 Loom 项目，意图是重新提供对用户线程�
 
 相对线程安全即时通常意义上的线程安全，调用时无需做额外的保障措施，但是对于一些特定顺序的连续调用，就可能需要在调用端使用额外的同步手段保证调用的正确性。
 
-java中大多数线程安全类都是这种类型，例如 `Vector` 、 `HashTable` 、 `Colletions` 的 `synchronizedCollection` 方法包装的集合等。
+java 中大多数线程安全类都是这种类型，例如 `Vector` 、 `HashTable` 、 `Colletions` 的 `synchronizedCollection` 方法包装的集合等。
 
 
 
@@ -691,7 +691,7 @@ Java 中最基本的互斥实现手段是 `synchronized` 关键字
 
 乐观锁需要 “操作” 和 “冲突检测” 这两个步骤具备原子性，但这里不能靠悲观锁实现，只能靠硬件的指令集实现，如果不是原子操作，则仍存在并发一致性问题，乐观锁的底层是基于 CAS 操作的。
 
-
+Java 中无锁并发的实现方式：volatile + CAS + while
 
 
 
@@ -699,7 +699,7 @@ Java 中最基本的互斥实现手段是 `synchronized` 关键字
 
 乐观锁：认为当前线程使用锁的过程中不会有其他线程修改数据，操作数据过程中不加锁，CAS 操作即是一种乐观锁。
 
-悲观锁：认为共享变量一定会有其他线程来修改，所以操作共享变量的时候一定要先加锁，`sychronized` 关键字以及 `ReentrantLock`都是悲观锁。
+悲观锁：认为共享变量一定会有其他线程来修改，所以操作共享变量的时候一定要先加锁，*sychronized* 关键字以及 `ReentrantLock` 都是悲观锁。
 
 
 
@@ -2042,7 +2042,7 @@ public static String concatString(String s1, String s2, String s3) {
 ### 无锁获取轻量级锁
 
 1. 加锁的字节码指令为 `monitorenter` ，JVM 执行该指令前，向线程栈内插入一条锁记录（Lock Record），让锁记录中的锁标识指向当前锁对象当前地址
-2. 构建一条无锁状态的 MarkWord，被称为 Displaced Mark Word，并将  Displaced Mark Word 保存到锁记录的 displaced 字段
+2. 构建一个锁对象处于无锁状态的 MarkWord，称为 Displaced Mark Word，将  Displaced Mark Word 保存到锁记录的 displaced 字段
 3. 使用 CAS 操作尝试将锁对象的 Mark Word 更新为指向当前锁记录的指针，即修改为轻量级锁状态，成功即代表该线程拥有了这个对象的锁。如果当前对象的 MarkWord 是无锁状态，这一步一定可以成功。
 
 从当前锁对象的 MarkWord 中的指针就可以看出持锁线程是当前线程。
@@ -2068,9 +2068,9 @@ public static String concatString(String s1, String s2, String s3) {
 
 ### 锁重入的计数方式
 
-锁重入次数是靠线程栈内指向当前锁的 Lock Record 的数量来标识的，当前线程每重入一次锁，就会在这个线程栈内插入关于这把锁的锁记录。
+锁重入次数是靠线程栈内指向当前锁对象的 Lock Record 的数量来标识的，当前线程每重入一次锁，就会在这个线程栈内插入关于这把锁的 Lock Record。
 
-当然，另一个方案是只创建一个Lock Record并在其中记录重入次数，Hotspot 没有这样做的原因可能是考虑到执行效率，每次重入获得锁都需要遍历该线程的栈找到对应的 Lock Record，然后修改它的值。不如以空间换时间，每次都是栈顶找 Lock Record 。
+当然，另一个方案是只创建一个Lock Record 并在其中记录重入次数，Hotspot 没有这样做的原因可能是考虑到执行效率，每次重入获得锁都需要遍历该线程的栈找到对应的 Lock Record，然后修改它的值，不如以空间换时间，每次都从栈顶找到 Lock Record 。
 
 
 
@@ -2078,9 +2078,9 @@ public static String concatString(String s1, String s2, String s3) {
 
 锁的不完全释放（针对重入）：
 
-1. 退出同步代码块的指令是 `monitorexit` ，JVM 首先从当前线程栈中找到 “最后一条” 锁引用字段 owner 指向当前锁对象的锁记录
+1. 退出同步代码块的指令是 `monitorexit` ，JVM 首先从当前线程栈中找到 “最后一条” 锁引用字段 owner 指向当前锁对象的 Lock Record
 2. 将锁引用字段 owner 设置为 null ，即完成了一次轻量级锁的退出
-3. 检查锁记录的 displaced 字段，发现为 null，完事
+3. 检查锁记录的 displaced 字段，发现为 null，说明是最后一次释放锁，完事
 
 
 
@@ -2099,7 +2099,7 @@ public static String concatString(String s1, String s2, String s3) {
 1. 加锁的字节码指令是 `monitorenter` ，JVM 执行该指令前，向线程栈内插入一条锁记录（Lock Record），让锁记录中的锁标识 owner 指向当前锁对象当前地址
 2. 锁对象生成一条无锁状态的 MarkWord，被称为 Displaced Mark Word，并将  Displaced Mark Word 保存到锁记录的 displaced 字段
 3. 使用 CAS 操作尝试将锁对象的 Mark Word 更新为指向当前锁记录的指针，由于持有轻量级锁的线程还没有释放，所以 CAS 失败，同时锁对象 MarkWord 指针指向的也不是当前线程的锁记录，并非重入，于是触发轻量级锁升级的逻辑
-4. 调用 `omAlloc`分配一个`ObjectMonitor` 对象并初始化该对象
+4. 调用 `omAlloc` 分配一个`ObjectMonitor` 对象并初始化该对象
 5. 通过 CAS 修改锁对象的状态为重量级锁。
    - CAS 成功，则将 ObjectMonitor 内部的 *_owner* 设置为持有轻量级锁的线程，然后将 Lock Record 内 displaced 字段指向的  Displaced Mark Word 保存到管程对象内，最后设置锁对象的状态为重量级锁，获取重量级锁成功。
 

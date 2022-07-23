@@ -139,6 +139,10 @@ Springboot将所有的功能场景都抽取出来，封装成 [starter](https://
 
 
 
+## 自动配置
+
+
+
 # SpringApplication🍀
 
 ## 启动
@@ -414,10 +418,6 @@ public class HelloServiceProperties {
 
 # SpringBoot配置🍀
 
-Springboot 相关的所有配置文档：https://docs.spring.io/spring-boot/docs/current/reference/html/
-
-
-
 ## 配置解析相关依赖
 
 SpringBoot使用一个全局的配置文件，配置文件名是固定的；
@@ -618,407 +618,49 @@ SpringBoot也可以从以下位置加载配置，优先级从高到低；高优�
 
 
 
-# 自动配置原理🍀
+# 日志🍀
 
-## 核心思想
+## 日志格式
 
-SpringBoot 定义了一套接口规范，这套规范规定：SpringBoot 在启动时会扫描外部引用 jar 包中的`META-INF/spring.factories`文件，将文件中配置的类型信息加载到 Spring 容器，并执行类中定义的各种操作。对于外部 jar 来说，只需要按照 SpringBoot 定义的标准，就能将自己的功能装置进 SpringBoot。
+- Date
+- Log Level
+- Process ID
+- Separator
+- Thread name
+- Logger name：通常是资源类名
+- Log message
 
-
-
-## 依赖管理
-
-springboot 配置文件中的父项目是 `spring-boot-starter-parent`
-
-```xml
-<parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.4.1</version>
-    <relativePath/>
-</parent>
 ```
-
-
-
-`spring-boot-starter-parent` 的父项目是 `spring-boot-dependencies`
-
-```xml
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-dependencies</artifactId>
-    <version>2.4.1</version>
-  </parent>
-```
-
-在 `spring-boot-dependencies` 中，几乎声明了所有开发中常用的依赖的版本号
-
-
-
-### 自动版本仲裁
-
-自动版本仲裁是指在引入依赖时，无需关心版本号。
-
-对于 `spring-boot-dependencies` 中配置过的依赖，可以应用自动版本仲裁，但是如果没有配置过，则必须在引入依赖时声明相关的版本。
-
-例如引入 mysql 相关的依赖，可以不声明版本号
-
-```xml
-<dependency>
-    <groupId>mysql</groupId>
-    <artifactId>mysql-connector-java</artifactId>
-</dependency>
-```
-
-因为在 `spring-boot-dependencies` 的 `<properties>` 中已经声明过 mysql 的版本了
-
-```xml
-<mysql.version>8.0.22</mysql.version>
-```
-
-如果想要自定义 Springboot 已经声明过的版本，可以直接在 `pom.xml` 中设置相关属性，当然也可以直接在 `<dependency>` 中带上版本号。
-
-```xml
-<properties>
-    <mysql.version>5.1.43</mysql.version>
-</properties>
-```
-
-
-
-### 场景启动器
-
-[starts](https://docs.spring.io/spring-boot/docs/current/reference/html/using-spring-boot.html#using-boot-starter) 被称为场景启动器
-
-官方的 starters 格式为 `spring-boot-starter-*` 
-
-非官方的 starters 格式为 `thirdpartyproject-spring-boot-starter`
-
-
-
-## @SpringBootApplication
-
-SpringBoot中可以配置的属性： [Application Properties](https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#common-application-properties)
-
-`@SpringBootApplication` 的元注解：
-
-```java
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@SpringBootConfiguration
-@EnableAutoConfiguration
-@ComponentScan(
-    excludeFilters = {@Filter(
-    type = FilterType.CUSTOM,
-    classes = {TypeExcludeFilter.class}
-), @Filter(
-    type = FilterType.CUSTOM,
-    classes = {AutoConfigurationExcludeFilter.class}
-)}
-)
-public @interface SpringBootApplication {
-
-}
+2019-03-05 10:57:51.112  INFO 45469 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/7.0.52
+2019-03-05 10:57:51.253  INFO 45469 --- [ost-startStop-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2019-03-05 10:57:51.253  INFO 45469 --- [ost-startStop-1] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1358 ms
+2019-03-05 10:57:51.698  INFO 45469 --- [ost-startStop-1] o.s.b.c.e.ServletRegistrationBean        : Mapping servlet: 'dispatcherServlet' to [/]
+2019-03-05 10:57:51.702  INFO 45469 --- [ost-startStop-1] o.s.b.c.embedded.FilterRegistrationBean  : Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
 ```
 
 
 
 
 
-### @SpringBootConfiguration
+## 日志输出
 
-`@SpringBootConfiguration` 使用了 `@Configuration` ，即表示当前类是一个配置类
+| `logging.file.name` | `logging.file.path` | Example    | Description                            |
+| :------------------ | :------------------ | :--------- | :------------------------------------- |
+| (none)              | *(none)*            |            | Console only logging.                  |
+| Specific file       | *(none)*            | `my.log`   | 日志文件会保存在当前目录或一个相对路径 |
+| (none)              | Specific directory  | `/var/log` | 日志文件会保存在指定目录               |
 
-```java
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Configuration
-public @interface SpringBootConfiguration {
-    @AliasFor(
-        annotation = Configuration.class
-    )
-    boolean proxyBeanMethods() default true;
-}
-```
 
 
+## 日志周转
 
-
-
-### @EnableAutoConfiguration
-
-`@EnableAutoConfiguration` 是实现自动装配的核心注解，它是 `@AutoConfigurationPackage` 和 `@Import` 的合成
-
-自动装配核心功能的实现实际是通过`@Import` 导入的 `AutoConfigurationImportSelector`类。
-
-```java
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@AutoConfigurationPackage
-@Import({AutoConfigurationImportSelector.class})
-public @interface EnableAutoConfiguration {
-    String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
-
-    Class<?>[] exclude() default {};
-
-    String[] excludeName() default {};
-}
-```
-
-
-
-#### @AutoConfigurationPackage
-
-`@AutoConfigurationPackage` 用于将指定包下的所有组件注入容器
-
-使用了 `@Import({Registrar.class})` 将 `Registrar` 中的相关方法返回值注入容器
-
-```java
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@Import({Registrar.class})
-public @interface AutoConfigurationPackage {
-    String[] basePackages() default {};
-
-    Class<?>[] basePackageClasses() default {};
-}
-```
-
-`Registrar` 类中有一个 `registerBeanDefinitions()` 方法，该方法调用了 `register()` 方法，用于给容器批量注入组件。
-
-metadata 表示被注解类的元信息，而这个被注解类就是主程序类 `DemoApplication.class` ，这里通过 metadata  获取了`DemoApplication.class` 所在包的包名并传入 `register()` 方法，即将 `DemoApplication.class` （启动类）所在包下的所有组件注册到容器之中，即将用户程序代码中自定义的组件注入容器。
-
-```java
-public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
-    AutoConfigurationPackages.register(registry, (String[])(new AutoConfigurationPackages.PackageImports(metadata)).getPackageNames().toArray(new String[0]));
-}
-```
-
-
-
-#### AutoConfigurationImportSelector
-
-`AutoConfigurationImportSelector` 中有一个 `selectImports()` 方法，该方法主要用于获取所有符合条件的类的全限定类名，将这些类被加载到 IOC 容器中。
-
-该方法中的主要逻辑在于 `getAutoConfigurationEntry()` 方法，方法的值最终被转为 String[] 返回
-
-```java
-public String[] selectImports(AnnotationMetadata annotationMetadata) {
-    if (!this.isEnabled(annotationMetadata)) {
-        return NO_IMPORTS;
-    } else {
-        AutoConfigurationImportSelector.AutoConfigurationEntry autoConfigurationEntry = this.getAutoConfigurationEntry(annotationMetadata);
-        return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
-    }
-}
-```
-
-`getAutoConfigurationEntry()` 方法的核心在于 `getCandidateConfigurations()` 方法，用于获取候选的组件，得到候选的组件后，经过一系列排除、过滤操作后得到最终应该注入容器的组件。
-
-> Springboot 2.4.5 可以获取 133 个候选组件
-
-```java
-protected AutoConfigurationImportSelector.AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
-    // 1. 判断自动状态有没有打开，可在application.properties中配置
-    if (!this.isEnabled(annotationMetadata)) {
-        return EMPTY_ENTRY;
-    } else {
-        AnnotationAttributes attributes = this.getAttributes(annotationMetadata);
-        // 获取候选配置
-        List<String> configurations = this.getCandidateConfigurations(annotationMetadata, attributes);
-        configurations = this.removeDuplicates(configurations);
-        Set<String> exclusions = this.getExclusions(annotationMetadata, attributes);
-        this.checkExcludedClasses(configurations, exclusions);
-        configurations.removeAll(exclusions);
-        configurations = this.getConfigurationClassFilter().filter(configurations);
-        this.fireAutoConfigurationImportEvents(configurations, exclusions);
-        return new AutoConfigurationImportSelector.AutoConfigurationEntry(configurations, exclusions);
-    }
-}
-```
-
-
-
-`getCandidateConfigurations()` 方法的核心在于 `loadFactoryNames()` 方法 
-
-```java
-protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
-    List<String> configurations = SpringFactoriesLoader.loadFactoryNames(this.getSpringFactoriesLoaderFactoryClass(), this.getBeanClassLoader());
-    Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories. If you are using a custom packaging, make sure that file is correct.");
-    return configurations;
-}
-```
-
-
-
-`loadFactoryNames()` 方法的核心在于 `loadSpringFactories()` 方法
-
-```java
-public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
-    ClassLoader classLoaderToUse = classLoader;
-    if (classLoader == null) {
-        classLoaderToUse = SpringFactoriesLoader.class.getClassLoader();
-    }
-
-    String factoryTypeName = factoryType.getName();
-    return (List)loadSpringFactories(classLoaderToUse).getOrDefault(factoryTypeName, Collections.emptyList());
-}
-```
-
-
-
-在 `loadSpringFactories()` 方法中，最终需要从各包的 `"META-INF/spring.factories"` 路径下加载资源
-
-```java
-Enumeration urls = classLoader.getResources("META-INF/spring.factories");
-```
-
-
-
-例如 `spring-boot-autoconfigure-2.4.5.jar` 中，就存在 `META-INF/spring.factories` 文件，Springboot 就是读取了这些文件中的配置信息，在该配置文件中所有写明的自动配置类，都是即将被导入 IOC 容器的候选类。
-
-需要注意的是，不是每个包都有 `META-INF/spring.factories` 文件
-
-<img src="http://store.secretcamp.cn/uPic/image-20210512095751721202105120957521620784672Y52uPoY52uPo.png" alt="image-20210512095751721" style="zoom:56%;" />
-
-<img src="http://store.secretcamp.cn/uPic/image-20210512100027389202105121000271620784827lGFTxslGFTxs.png" alt="image-20210512100027389" style="zoom: 33%;" />
-
-
-
-### @ComponentScan
-
-
-
-
-
-## XXXAutoConfiguration分析
-
-取  `spring-boot-autoconfigure-2.4.5.jar`  中的几个类进行分析
-
-### AopAutoConfiguration
-
-以 AOP 的配置为例，`AopAutoConfiguration` 中有两个静态内部类，它们都是配置类：
-
-- `ClassProxyingConfiguration`
-- `AspectJAutoProxyingConfiguration`
-
-```java
-@Configuration(
-    proxyBeanMethods = false
-)
-// 表示只有 spring.aop.auto=true 时，以下配置才生效
-// matchIfMissing = true 表示即使不配置 spring.aop.auto=true ，也认为 spring.aop.auto=true
-@ConditionalOnProperty(
-    prefix = "spring.aop",
-    name = {"auto"},
-    havingValue = "true",
-    matchIfMissing = true
-)
-public class AopAutoConfiguration {
-    public AopAutoConfiguration() {
-    }
-
-    @Configuration(
-        proxyBeanMethods = false
-    )
-    // 只有不存在 org.aspectj.weaver.Advice 类时，以下配置才生效
-    // 意思是不能导入 aspectj 包
-    @ConditionalOnMissingClass({"org.aspectj.weaver.Advice"})
-  	// 表示只有 spring.aop.proxy-target-class=true 时，以下配置才生效
-    // matchIfMissing 表示以上配置中的 true 是默认情况
-    @ConditionalOnProperty(
-        prefix = "spring.aop",
-        name = {"proxy-target-class"},
-        havingValue = "true",
-        matchIfMissing = true
-    )
-    static class ClassProxyingConfiguration {
-				// ...
-    }
-
-    @Configuration(
-        proxyBeanMethods = false
-    )
-    // 只有存在 Advice 类时，以下配置才生效，而 Advice 是指 org.aspectj.weaver.Advice;
-  	// 如果没有导入 aspectj 包，以下配置就不生效
-    // 所以如果导入了 aspectj 包，就用下面的配置
-    @ConditionalOnClass({Advice.class})  
-    static class AspectJAutoProxyingConfiguration {
-        // ...
-    }
-}
-
-```
-
-
-
-### DispatcherServletAutoConfiguration
-
-```java
-@AutoConfigureOrder(-2147483648)
-@Configuration(
-    proxyBeanMethods = false
-)
-@ConditionalOnWebApplication(
-    type = Type.SERVLET
-)
-@ConditionalOnClass({DispatcherServlet.class})
-@AutoConfigureAfter({ServletWebServerFactoryAutoConfiguration.class})
-public class DispatcherServletAutoConfiguration {
-    public static final String DEFAULT_DISPATCHER_SERVLET_BEAN_NAME = "dispatcherServlet";
-    public static final String DEFAULT_DISPATCHER_SERVLET_REGISTRATION_BEAN_NAME = "dispatcherServletRegistration";
-
-    public DispatcherServletAutoConfiguration() {
-    }
-
-    @Order(2147483637)
-    private static class DispatcherServletRegistrationCondition extends SpringBootCondition {
-				// ...
-    }
-
-    @Order(2147483637)
-    private static class DefaultDispatcherServletCondition extends SpringBootCondition {
-				// ...
-    }
-
-    @Configuration(
-        proxyBeanMethods = false
-    )
-    @Conditional({DispatcherServletAutoConfiguration.DispatcherServletRegistrationCondition.class})
-    @ConditionalOnClass({ServletRegistration.class})
-    // 将 WebMvcProperties.class 与当前配置类绑定，同时注入容器
-    @EnableConfigurationProperties({WebMvcProperties.class})
-    @Import({DispatcherServletAutoConfiguration.DispatcherServletConfiguration.class})
-    protected static class DispatcherServletRegistrationConfiguration {
-				// ...
-    }
-
-    @Configuration(
-        proxyBeanMethods = false
-    )
-    @Conditional({DispatcherServletAutoConfiguration.DefaultDispatcherServletCondition.class})
-    @ConditionalOnClass({ServletRegistration.class})
-    @EnableConfigurationProperties({WebMvcProperties.class})
-    protected static class DispatcherServletConfiguration {
-				// ...
-    }
-}
-```
-
-
-
-
-
-## XXXProperties分析
-
-
+| Name                                                   | Description                                |
+| :----------------------------------------------------- | :----------------------------------------- |
+| `logging.logback.rollingpolicy.file-name-pattern`      | 文件名的模式                               |
+| `logging.logback.rollingpolicy.clean-history-on-start` | 应用启动时是否清除日志                     |
+| `logging.logback.rollingpolicy.max-file-size`          | 存档前日志文件的最大大小                   |
+| `logging.logback.rollingpolicy.total-size-cap`         | 日志归档文件在被删除之前所能容纳的最大大小 |
+| `logging.logback.rollingpolicy.max-history`            | 日志保存的天数（默认7天）                  |
 
 
 
@@ -1222,9 +864,9 @@ Springboot 默认打包方式是 jar 包，而 JSP 不支持在 jar 包内编译
 
 👉  [官方文档](https://docs.spring.io/spring-boot/docs/current/reference/html/using-spring-boot.html#using-boot-devtools)
 
-devtools 会监控所有 classpath 中的修改，并实现热重启
+devtools 会监控所有 classpath 中的修改，并实现热重启（Hot Restart）
 
-触发热重启：command + F9  构建项目
+在 IDEA 中触发热重启： “构建” 项目
 
 ```xml
 <dependency>
@@ -1235,6 +877,32 @@ devtools 会监控所有 classpath 中的修改，并实现热重启
 ```
 
 
+
+热重启的原理是 Spring 使用两个类加载器启动项目，第一个用来加载不会改变的 jar 包中的类（第三方），第二个用来加载开发者编写的类，当触发热重启时，会作废第二个类加载器，创建新的类加载器，但是第一个类加载器仍然复用，所以 “热重启” 比 “冷开始” 速度更快。
+
+默认情况下，静态资源不会触发 “热重启”，但会触发 “热加载”。
+
+可以修改配置文件，自定义触发热重启的范围：
+
+```properties
+# 以下路径修改不触发热重启
+spring.devtools.restart.exclude=static/**,public/**
+
+# 追加不触发热重启的范围
+spring.devtools.restart.additional-exclude=hello/**
+
+# 追加触发热重启的范围
+spring.devtools.restart.additional-paths=world/**
+
+# 禁用热重启
+spring.devtools.restart.enabled=false
+```
+
+
+
+## JRebel
+
+如果热重启的速度不能达到要求，可以使用 JRebel，它可以在重启时动态修改类，使得重启项目的速度更快，这被称为 “热加载”。
 
 
 

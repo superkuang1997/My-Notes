@@ -1,4 +1,8 @@
-# SpringMVC🍀
+# Spring Web MVC🍀
+
+Spring Web MVC 是一个基于 Servlet API 的 Web 框架，即众所周知的 SpringMVC 。 
+
+
 
 ## 参考文档
 
@@ -8,11 +12,17 @@
 
 
 
-## 框架
 
-框架（Framework）是整个或部分系统的可重用设计，表现为一组抽象构件及构件实例间交互的方法；另一种定义认为，框架是可被应用开发者定制的应用骨架。。
 
-简而言之，框架其实就是某种应用的半成品，就是一组组件，供你选用完成你自己的系统。
+## MVC
+
+MVC（Model、View、Controller），是模型－视图－控制器的缩写，是一种用于设计创建 Web 应用程序表现层的模式。
+
+MVC 是在应用程序（BS结构）的表现层划分出来的不同功能的几个模块。
+
+- Model：数据模型，JavaBean，一般情况下用于封装数据。 
+- View：通常指的是 jsp 或者 html，作用一般就是展示数据的，通常视图是依据模型数据创建的。
+- Controller：是应用程序中处理用户交互的部分，作用一般就是处理程序逻辑的。
 
 
 
@@ -25,18 +35,6 @@
 - 业务层： 也就是常说的 service 层。它负责业务逻辑处理。web 层依赖业务层，但是业务层不依赖 web 层。业务层在业务处理时可能会依赖持久层，如果要对数据持久化需要保证事务一致性。（事务应该放到业务层来控制）
 
 - 持久层： 也就是是 dao 层，负责数据持久化，包括数据层即数据库和数据访问层，数据库是对数据进行持久化的载体，数据访问层是业务层和持久层交互的接口，业务层需要通过数据访问层将数据持久化到数据库中。通俗的讲，持久层就是和数据库交互，对数据库表进行增删改查的。 
-
-
-
-## MVC
-
-MVC（Model、View、Controller），是模型－视图－控制器的缩写，是一种用于设计创建 Web 应用程序表现层的模式。
-
-MVC 是在应用程序（BS结构）的表现层划分出来的不同功能的几个模块。
-
-- Model：数据模型，JavaBean，一般情况下用于封装数据。 
-- View：通常指的是 jsp 或者 html，作用一般就是展示数据的，通常视图是依据模型数据创建的。
--  Controller：是应用程序中处理用户交互的部分，作用一般就是处理程序逻辑的。
 
 
 
@@ -101,6 +99,78 @@ spring-webmvc 是对 SpringMVC 的具体实现，spring-webmvc 依赖于 spring-
 
 
 
+## WebMvc配置
+
+### 开启MVC配置
+
+可以使用 `@EnableWebMvc` 去允许 SpringMVC 进行配置
+
+```java
+@Configuration
+@EnableWebMvc
+public class WebConfig {
+}
+```
+
+
+
+也可以使用 XML 的方式：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <mvc:annotation-driven/>
+
+</beans>
+```
+
+
+
+
+
+### XML配置
+
+
+
+
+
+### Java编码配置
+
+```java
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer {
+
+    // 通过实现方法来自定义组件
+}
+```
+
+
+
+### 进阶配置方法
+
+ `@EnableWebMvc`  注解会在容器中导入一个 `DelegatingWebMvcConfiguration` ，它会向 Spring 容器中注入一些默认的组件，同时也会检测到容器中实现了  `WebMvcConfigurer`  的配置类，从而实现自定义 MVC 配置。
+
+一种进阶的使用方法是不使用  `@EnableWebMvc` 和实现 `WebMvcConfigurer` ，而是直接继承类 `DelegatingWebMvcConfiguration` ，这样，SpringMVC 的一切配置将由开发者直接定义。
+
+```java
+@Configuration
+public class WebConfig extends DelegatingWebMvcConfiguration {
+
+    // ...
+}
+```
+
+
+
 # SpringMVC相关注解🍀
 
 ## @RequestMapping
@@ -119,7 +189,7 @@ spring-webmvc 是对 SpringMVC 的具体实现，spring-webmvc 依赖于 spring-
 
 - headers：发送的请求中必须包含的请求头
 
-`@RequestMapping`可以作用在方法和类上
+`@RequestMapping ` 可以作用在方法和类上
 
 - 作用在类上：第一级的访问目录
 
@@ -442,11 +512,13 @@ public class AnnoController {
 
 
 
-## 前端控制器 DispatcherServlet
+## DispatcherServlet 前端控制器 
 
 前端控制器（DispatcherServlet），负责接收用户的请求并根据用户的请求返回相应的视图给用户，DispatcherServlet 是整个流程控制的中心，由它调用其它组件处理用户的请求。
 
-前端控制器在 `web.xml` 中配置，并在 `<init-param>` 中指定了 spring 的配置文件
+### 配置方式
+
+可以在 `web.xml` 中配置，并在 `<init-param>` 中指定了 spring 的配置文件
 
 url-pattern：
 
@@ -468,13 +540,48 @@ url-pattern：
 </servlet>
 <servlet-mapping>
     <servlet-name>dispatcherServlet</servlet-name>
-    <url-pattern>/</url-pattern>
+    <url-pattern>/app/*</url-pattern>
 </servlet-mapping>
 ```
 
 
 
-## 处理器映射器 HandlerMapping
+也可以使用 Java 编码的方式配置：
+
+```java
+@Controller
+public class MyWebApplicationInitializer implements WebApplicationInitializer {
+
+    @Override
+    public void onStartup(ServletContext servletContext) {
+
+        // Load Spring web application configuration
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.register(AppConfig.class);
+
+        // Create and register the DispatcherServlet
+        DispatcherServlet servlet = new DispatcherServlet(context);
+        ServletRegistration.Dynamic registration = servletContext.addServlet("dispatcherServlet", servlet);
+        registration.setLoadOnStartup(1);
+        registration.addMapping("/app/*");
+    }
+}
+```
+
+
+
+### 初始化参数
+
+| 参数                           | 说明                                                         |
+| ------------------------------ | ------------------------------------------------------------ |
+| contextClass                   | 默认是 `XmlWebApplicationContext`                            |
+| contextConfigLocation          | String，Spring Context 的路径                                |
+| namespace                      | `WebApplicationContext` 的名称空间，默认是 `[servlet-name]-servlet` |
+| throwExceptionIfNoHandlerFound | boolean，未发现是否抛出异常                                  |
+
+
+
+## HandlerMapping 处理器映射器
 
 处理器映射器（HandlerMapping）负责根据用户请求 url 找到 Handler 即处理器，SpringMVC 提供了不同的映射器实现不同的映射方式，例如：配置文件方式，实现接口方式，注解方式等。
 
@@ -482,23 +589,24 @@ url-pattern：
 <!--配置处理器映射器 选择其中一个 -->
 <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
 <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
+<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"/>
 ```
 
 
 
-## 处理器 Handler
+##  Handler 处理器
 
-Handler 是后端控制器，DispatcherServlet 将用户请求转发到 Handler， 对具体的用户请求进行处理。
+Handler 是后端控制器，DispatcherServlet 将用户请求通过 HandlerMapping 转发到 Handler， 对具体的用户请求进行处理。
 
-Controller 指定的是类，而 Handler 指定的类中的一个方法。
-
-
+Controller 指的是类，而 Handler 指的是类中的一个方法。
 
 
 
-## 处理器适配器 HandlerAdapter
 
-通过 HandlerAdapter 对处理器进行执行，这是适配器模式的应用，通过扩展适配器可以对更多类型的处理器进行执行。
+
+## HandlerAdapter 处理器适配器
+
+通过 HandlerAdapter 对 Hander 进行执行，不管具体执行的过程。这是适配器模式的应用，通过扩展适配器可以对更多类型的处理器进行执行。
 
 ```xml
 <!-- 配置处理器适配器 选择其中一个 -->
@@ -517,11 +625,11 @@ public boolean supports(Object handler) {
 }
 ```
 
-如果 `support()` 返回 true，则可以用  `handler()` 方法进行处理，返回一个 `ModelAndView`
+如果 `support(...)` 返回 true，则可以用  `handler(...)` 方法进行处理，返回一个 `ModelAndView`
 
 
 
-## 视图解析器 ViewResolver
+## ViewResolver 视图解析器
 
 视图解析器（ViewResolver）负责将处理结果生成视图（View）。
 
@@ -553,7 +661,7 @@ ViewResolver 首先根据逻辑视图名解析成物理视图名，即具体的�
 
 
 
-## 视图 View
+## View 视图
 
 SpringMVC 提供了很多的视图类型的支持，包括：jstlView、freemarkerView、pdfView 等，最常用的视图是 jsp 。
 
@@ -561,7 +669,7 @@ SpringMVC 提供了很多的视图类型的支持，包括：jstlView、freemark
 
 
 
-## 过滤器 Filter
+## Filter 过滤器 
 
 过滤器（Filter）依赖于 Servlet 容器，在实现上基于函数回调，可以对几乎所有请求进行过滤，但是缺点是一个过滤器实例只能在容器初始化时调用一次。
 
@@ -591,7 +699,7 @@ SpringMVC 提供了很多的视图类型的支持，包括：jstlView、freemark
 
 
 
-## 拦截器 HandlerInterceptor
+## Interceptor 拦截器 
 
 SpringMVC 的处理器拦截器类似于 Servlet 开发中的过滤器 Filter，用于对处理器进行预处理和后处理。
 
@@ -642,6 +750,28 @@ public class FirstInterceptor implements HandlerInterceptor {
 
 ### 配置拦截器
 
+Java 编码配置：
+
+```java
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new LocaleChangeInterceptor());
+        registry.addInterceptor(new ThemeChangeInterceptor())
+          .addPathPatterns("/**")
+          .excludePathPatterns("/admin/**");
+        registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
+    }
+}
+```
+
+
+
+XML配置：
+
 `<mvc:mapping>` 的 path 表示需要拦截的 Controller
 
 也可以使用 `<mvc:exclude-mapping>` 标签，表示除了设定的 Controller 之外全都拦截
@@ -661,7 +791,7 @@ public class FirstInterceptor implements HandlerInterceptor {
 
 
 
-## 异常处理器 ExceptionResolver
+## ExceptionResolver 异常处理器 
 
 异常处理器（ExceptionResolver）：服务器接收请求时，Controller调用业务层Service，业务层调用持久层，如果在持久层发生了异常，则会按照相反方向将异常层层抛出，最终由 DispatcherServlet 调用异常处理器进行异常处理。
 
@@ -734,7 +864,7 @@ public class SystemExceptionResolver implements HandlerExceptionResolver {
 
 
 
-## 类型转换器 Converter
+## Converter 类型转换器 
 
 ### 默认类型转换器
 
@@ -1059,7 +1189,7 @@ public ModelAndView test(ModelAndView mv) {
 
 
 
-## 请求转发 forward
+## 请求转发
 
 使用 `forward` 关键字进行请求转发，`forward:转发的页面路径"` ，不经过视图解析器，所以需要编写完整的路径
 
@@ -1081,7 +1211,7 @@ public String testForward02(){
 
 
 
-## 请求重定向 redirect
+## 请求重定向
 
 使用 `redirect` 关键字进行重定向：`redirect:重定向路径"`
 
@@ -1101,6 +1231,40 @@ public String testRedirect02(){
 ```
 
 
+
+## 内容协商
+
+Java 编码配置：
+
+```java
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        configurer.mediaType("json", MediaType.APPLICATION_JSON);
+        configurer.mediaType("xml", MediaType.APPLICATION_XML);
+    }
+}
+```
+
+
+
+XML配置：
+
+```xml
+<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
+
+<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+    <property name="mediaTypes">
+        <value>
+            json=application/json
+            xml=application/xml
+        </value>
+    </property>
+</bean>
+```
 
 
 
@@ -1247,23 +1411,9 @@ public String fileUpload(HttpServletRequest request, MultipartFile upload) throw
 
 
 
-# WebMvc配置🍀
-
-## Spring MVC 自动配置特性
-
-Spring Boot provides auto-configuration for Spring MVC that works well with most applications.
-
-The auto-configuration adds the following features on top of Spring’s defaults:
-
-- Inclusion of `ContentNegotiatingViewResolver` and `BeanNameViewResolver` beans.
-- Support for serving static resources, including support for WebJars ( [go there](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.spring-mvc.static-content)).
-- Automatic registration of `Converter`, `GenericConverter`, and `Formatter` beans.
-- Support for `HttpMessageConverters` ( [go there](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.spring-mvc.message-converters)).
-- Automatic registration of `MessageCodesResolver` ( [go there](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.spring-mvc.message-codes)).
-- Static `index.html` support.
-- Automatic use of a `ConfigurableWebBindingInitializer` bean ( [go there](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.spring-mvc.binding-initializer)).
 
 
+# Springboot自动配置MVC🍀
 
 ## 扩展自动配置
 

@@ -8,7 +8,7 @@ Spring Data 是 Spring 的一个子项目，用于简化数据库访问，支持
 
 
 
-# Spring Data Repositories
+# Spring Data Repositories🌈
 
 ## 核心概念
 
@@ -219,7 +219,7 @@ Repository 接口的默认实现是 Spring Data 创建代理对象中实现
 
 
 
-# Spring Data Annotation🌈
+# Spring Data 注解🌈
 
 ## 公共注解🌟
 
@@ -253,7 +253,43 @@ Repository 接口的默认实现是 Spring Data 创建代理对象中实现
 
 
 
-## @PersistenceConstructor
+### @PersistenceConstructor
+
+
+
+
+
+## 审计相关注解🌟
+
+日常开发中，经常会遇到实体有创建时间、更新时间、创建人、更新人等字段。这些字段不是核心的业务字段，但是对于跟踪数据记录却非常重要。由于重要程度不是那么高，经常会忘了赋值，导致数据库存的是过期数据。
+
+Spring Data 的审计（Auditing）功能提供一组注解来自动填充这些非核心字段。
+
+
+
+### @CreatedDate
+
+创建时间
+
+
+
+### @LastModifiedDate
+
+最后更新时间
+
+
+
+### @CreatedBy
+
+创建人信息
+
+
+
+### @LastModifiedBy
+
+最后更新人信息
+
+
 
 
 
@@ -295,7 +331,7 @@ interface BookRepository extends Repository<Book, String> {
 
 
 
-#### @GeoSpatialIndexed
+### @GeoSpatialIndexed
 
 
 
@@ -359,21 +395,6 @@ interface BookRepository extends Repository<Book, String> {
 
 
 
-# Auditing🌈
-
-日常开发中，经常会遇到实体有创建时间、更新时间、创建人、更新人等字段。这些字段不是核心的业务字段，但是对于跟踪数据记录却非常重要。由于重要程度不是那么高，经常会忘了赋值，导致数据库存的是过期数据。
-
-Spring Data 的审计（Auditing）功能提供一组注解来自动填充这些非核心字段。
-
-## 审计相关注解
-
-- `@CreatedDate`：创建时间
-- `@LastModifiedDate`：最后更新时间
-- `@CreatedBy`：创建人信息
-- `@LastModifiedBy`：最后更新人信息
-
-
-
 
 
 # Spring Data - JDBC🌈
@@ -412,25 +433,11 @@ Spring Data 的审计（Auditing）功能提供一组注解来自动填充这些
 
 ## 配置数据源
 
-```yaml
-# application.yaml
-spring:
-  datasource:
-    username: root
-    password: kzqkzq
-    url: jdbc:mysql://localhost:3306/common-example
-    driver-class-name: com.mysql.cj.jdbc.Driver
-```
-
-
-
-
-
-## 配置数据源
-
 ### DriverManagerDataSource
 
-`DriverManagerDataSource` 是 Spring 内置的一个数据源，但是其建立连接是只要有连接就新建一个 connection，没有连接池的作用。
+`DriverManagerDataSource` 是 Spring 内置的一个数据源，但是其建立连接是只要有连接就新建一个 Connection，没有连接池的作用。
+
+Spring：
 
 ```xml
 <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" >
@@ -442,6 +449,8 @@ spring:
 ```
 
 
+
+Springboot：
 
 ```yaml
 # application.yaml
@@ -459,6 +468,8 @@ spring:
 
 ### C3P0
 
+Spring：
+
 ```xml
 <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
     <property name="driverClass" value="com.mysql.jdbc.Driver"></property>
@@ -471,6 +482,8 @@ spring:
 
 
 ### DBCP
+
+Spring：
 
 ```xml
 <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
@@ -485,6 +498,8 @@ spring:
 
 ### Driud
 
+Spring：
+
 ```xml
 <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
     <property name="driverClassName" value="com.mysql.jdbc.Driver" />
@@ -495,6 +510,8 @@ spring:
 ```
 
 
+
+Springboot：
 
 ```yaml
 # application.yaml
@@ -513,7 +530,7 @@ spring:
 
 `JdbcTemplate` 主要提供以下五类方法：
 
-- execute：可以用于执行任何SQL语句，一般用于执行DDL语句；
+- execute：可以用于执行任何 SQL 语句，一般用于执行 DDL 语句；
 - update：用于执行新增、修改、删除等语句；
 - batchUpdate：方法用于执行批处理update语句；
 - query | queryForList | queryForObject：用于执行查询相关语句；
@@ -528,11 +545,9 @@ List<Account> accounts = jdbcTemplate.query("select * from account where id = ?"
 
 
 
-## 代码示例
+代码示例：
 
 ```java
-package Jdbc.SpringTemplate;
-
 public class demo {
 		
     // 传递一个数据库连接对象，这里通过 druid 取得
@@ -609,11 +624,15 @@ public class demo {
 
 
 
+## NamedParameterJdbcTemplate
+
+
+
+
+
 
 
 ## 自动配置原理
-
-### 自动配置类
 
 ```spreadsheet
 org.springframework.boot.autoconfigure.data.jdbc.JdbcRepositoriesAutoConfiguration

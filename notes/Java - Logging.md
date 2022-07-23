@@ -13,11 +13,13 @@ SpringBoot 的日志抽象层框架使用了 SLF4j，具体实现框架使用了
 
 ## 日志框架
 
-SLF4J 不同于其他日志类库，与其它日志类库有很大的不同。SLF4J (Simple logging Facade for Java)不是一个真正的日志实现，而是一个抽象层，它允许你在后台使用任意一个日志类库。如果是在编写供内外部都可以使用的 API 或者通用类库，那么你不会希望使用你类库的客户端必须使用你选择的日志类库。
+commons-logging 和 slf4j 都是日志的接口，供用户使用，而没有提供具体实现，log4j、logback 等才是日志的真正实现，当用户调用接口时，接口的工厂会自动寻找恰当的实现，返回一个实现的实例，这些过程都是透明化的。
+
+
 
 ### 抽象层
 
-- JCL（Jakarta Commons Logging）
+- Apache Commons Logging
 - SLF4j（Simple Logging Facade for Java）
 - jboss-logging
 

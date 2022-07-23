@@ -1,4 +1,4 @@
-# Python
+# Python🐍
 
 
 
@@ -16,18 +16,269 @@
 
 
 
+
+
+## cmd命令
+
+```sh
+python [option] ... [-c cmd | -m mod | file | -] [arg] ...
+```
+
+
+
+```sh
+# 将库中的python模块用作脚本去运行
+python -m | -mod
+```
+
+
+
 # pip🐍 
 
+## pip命令
+
+```sh
+# 安装依赖项
+pip install -r requirement.txt 
+# 安装最新版本的模块
+pip install -U moddle  
 ```
-pip install -r requirement.txt  # 安装依赖项
-pip install -U moddle  # 安装最新版本的模块
+
+
+
+
+
+```python
+# --user 会将 Python 程序包安装到 `$HOME/.local` 路径下，其中包含三个字文件夹：bin，lib 和 share
+# 这个路径默认不在$PYTH中
+pip install --user package_name
+
+# 安装路径在 '/root/.local/bin'
+sudo pip install --user package_name
+```
+
+可以手动将以上目录加入环境变量：
+
+```sh
+export PATH=$HOME/.local/bin:$PATH
 ```
 
 
 
 
 
-# 表达式
+# 数据结构🐍 
+
+## 列表
+
+### 定义列表
+
+```python
+mylist = [3, 5, 7, 2, 20]
+```
+
+
+
+
+
+### 列表方法
+
+append：直接添加
+
+```python
+> mylist.append([1,2,3])
+> mylist
+  [3, 5, 7, 2, 20, [1, 2, 3]]
+```
+
+
+
+extend：去除一个维度后再添加
+
+```python
+> mylist.extend([[[2, 3], 2], [6, 7]])
+> mylist
+	[3, 5, 7, 2, 20, [[2, 3], 2], [6, 7]]
+```
+
+
+
+pop：移出尾元素并返回
+
+```python
+> mylist.pop()
+	20
+```
+
+
+
+remove：删除一个元素
+
+```python
+> mylist.remove(3)
+
+> del mylist[3] 
+```
+
+
+
+clear：清空列表
+
+```
+> mylist.clear()
+```
+
+
+
+sort：排序列表
+
+- key：可以接收一个 lambda 表达式
+
+- reverse：升序 or 降序
+
+```python
+def func(x):
+    if x > 10:
+        return 0
+    return 1
+
+mylist = [3, 5, 7, 2, 20]
+mylist.sort(key=lambda x: func(x), reverse=True)
+mylist
+```
+
+
+
+reverse：反转
+
+```python
+> mylist.reverse()
+> mylist
+	[20, 2, 7, 5, 3]
+```
+
+
+
+index：索引
+
+```python
+> mylist.index(7)
+  2
+```
+
+
+
+### 列表切片（magic）
+
+#### 正序索引
+
+```python
+> mylist[::]
+	[50, 70, 30, 20, 90, 10, 50]
+  
+> mylist[1:5:1]
+	[70, 30, 20, 90]
+  
+> mylist[1:5:2]
+	[70, 20]
+ 
+```
+
+<img src="http://store.secretcamp.cn/uPic/image-20211123153744663202111231537461637653066O8itEYO8itEY.png" alt="image-20211123153744663" style="zoom:40%;" />
+
+
+
+#### 逆序索引
+
+```python
+> mylist[-6::1]
+	[70, 30, 20, 90, 10, 50]
+	
+> mylist[-6:-1:1]
+	[70, 30, 20, 90, 10]
+```
+
+<img src="http://store.secretcamp.cn/uPic/image-20211123154501880202111231545021637653502dK15uHdK15uH.png" alt="image-20211123154501880" style="zoom:40%;" />
+
+
+
+#### 进阶操作
+
+切片有三个参数，start、end、step
+
+step > 0 时，start 默认为 0，end 默认为 len(mylist)
+
+step < 0 时，start 默认为 len(mylist) - 1 , end 默认为 -1（含义上是 -1，实际上不能用 -1 表示）
+
+```python
+# 表示从index=-1开始，向右(正向)一直找到index=3，一个元素也找不到
+> mylist[-1:3:1]
+	[]
+
+# 相当于 mylist[-1:3:-1]，表示从index=-1开始，向左(反向)找一直找到index=3
+> mylist[:3:-1]
+[50, 10, 90]
+```
+
+
+
+
+
+## 字典
+
+### 定义字典
+
+
+
+### 字典方法
+
+#### get
+
+根据键获取值，如果键不存在则返回default
+
+```
+dict.get (key, default=None)
+```
+
+
+
+
+
+#### setdefault
+
+和 `get#` 类似，如果键不存在于字典中，将会添加键并将值设为默认值，如果键存在，则返回对应的值
+
+
+
+#### pop
+
+删除字典给定键 key 所对应的值，返回值为被删除的值。key 值必须给出。否则，返回 default 值。
+
+```
+dict.pop(key [, default])
+```
+
+
+
+### 字典排序
+
+sorted
+
+
+
+## 元组
+
+不可变的列表被称为元组。
+
+
+
+### 定义元组
+
+
+
+
+
+# 控制流🐍
 
 ## 三元表达式
 
@@ -37,45 +288,47 @@ pip install -U moddle  # 安装最新版本的模块
 
 
 
-# 数据结构🐍 
-
-## 列表
+## for
 
 
 
-## 字典
+
+
+## while
 
 
 
-# 函数🐍 
 
-## 参数传递
 
-### args
+# 参数传递🐍
+
+## args
 
 args 是 arguments 的缩写，表示位置参数。*args 必须放在 **kwargs 的前面，因为args类型是一个tuple，而kwargs则是一个字典dict，位置参数只能在关键字参数的前面。
 
 
 
-### kwargs
-
-
+## kwargs
 
 kwargs 是 keyword arguments 的缩写，表示关键字参数。**kwargs则是将一个可变的关键字参数的字典传给函数实参，同样参数列表长度可以为0或为其他值。
 
-### *args与**kwargs
 
-args和kwargs不仅可以在**函数定义**中使用，还可以在**函数调用**中使用。在调用时使用就相当于pack（打包）和unpack（解包），类似于元组的打包和解包。
 
-**函数定义中使用**
+## *args与**kwargs
+
+args 和 kwargs 不仅可以在函数定义中使用，还可以在函数调用中使用。在调用时使用就相当于pack（打包）和unpack（解包），类似于元组的打包和解包。
+
+### 函数定义中使用
 
 ```python
 def test_kwargs(first, *args, **kwargs):
    print('Required argument: ', first)
    print(type(kwargs))
-   for v in args:  # 遍历元组
+   # 遍历元组
+   for v in args:  
       print('Optional argument (args): ', v)
-   for k, v in kwargs.items():  # 遍历字典
+   # 遍历字典
+   for k, v in kwargs.items():  
       print('Optional argument %s (kwargs): %s' % (k, v))
 
 test_kwargs(1, 2, 3, 4, name='alice', age=16)
@@ -93,7 +346,9 @@ Optional argument name (kwargs): alice
 Optional argument age (kwargs): 16
 ```
 
-**函数调用中使用**
+
+
+### 函数调用中使用
 
 ```python
 def test_args_kwargs(name, age, sex):
@@ -123,11 +378,29 @@ sex: False
 
 
 
-------
+# 内置函数🐍
 
-## 内置函数
+## help
 
-### setdefault
+用于查看函数或模块用途的详细说明。
+
+
+
+## split
+
+
+
+## sorted
+
+该方法在副本上执行，并返回排序后的副本
+
+```python
+sorted(iterable, /, *, key=None, reverse=False)
+```
+
+
+
+## setdefault
 
 如果键不存在于字典中，将会添加键并将值设为默认值。
 
@@ -137,7 +410,7 @@ dict.set_defalut("name", "kiana")
 dict.get("name", "kiana")
 ```
 
-### update
+## update
 
 字典A的update函数把字典B的键/值对更新到字典A里
 
@@ -147,7 +420,7 @@ dict.get("name", "kiana")
 {'a': 1, 'b': 2, 'c': 3}
 ```
 
-### getattr
+## getattr
 
 返回一个对象属性值，不存在则返回default
 
@@ -166,13 +439,13 @@ kiana
 
 
 
-### input
+## input
 
 
 
 
 
-### map
+## map
 
 `map()` 会根据提供的函数对指定序列做映射。
 
@@ -192,13 +465,42 @@ map(square, [1,2,3,4,5])
 
 
 
-### format
+## format
 
 
 
+## enumerate
+
+遍历
 
 
-## 魔法函数
+
+## zip
+
+
+
+# 魔法函数🐍
+
+
+
+# datetime🐍
+
+datetime 模块中包含 date、time 和 datetime 三种主要的时间类
+
+<img src="http://store.secretcamp.cn/uPic/image-20220122192557671202201221925571642850757vZuKATvZuKAT.png" alt="image-20220122192557671" style="zoom:50%;" />
+
+## 时间运算
+
+```python
+timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
+```
+
+
+
+```python
+# datetime运算可以得到timedelta
+delta = datetime(2011,1,7) - datetime(2008,6,24,8,15)
+```
 
 
 
@@ -416,6 +718,14 @@ class Student:
   定义：使用装饰器`@staticmethod`。参数随意，没有`self`和`cls`参数，但是方法体中不能使用类或实例的任何属性和方法；
 
   调用：类对象或实例对象都可以调用。
+
+
+
+
+
+# Lambda🐍
+
+
 
 
 

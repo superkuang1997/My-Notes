@@ -230,6 +230,9 @@ git 中有三级配置文件：
 git config --global user.name superkuang1997
 git config --global user.email 1120053798@qq.com 
 
+# 删除某个全局配置
+git config --global --unset user.name
+
 # 查看所有配置以及它们所在的文件  --list 表示所有配置 --show-origin 表示显示原始输出 
 git config --list --show-origin
 
@@ -242,6 +245,9 @@ git config user.name
 
 # 查看配置 -l, --list
 git config --global -l
+
+# 编辑配置文件
+git config --global --edit
 ```
 
 
@@ -251,8 +257,9 @@ git config --global -l
 如果你有一个尚未进行版本控制的项目目录，想要用 git 来控制它，那么首先需要进入该项目目录中，并使用 `git init` 来初始化一个本地仓库，该命令将创建一个名为 `.git` 的子目录，这个子目录含有你初始化的 git 仓库中所有的必须文件。
 
 ```sh
-cd /Users/user/my_project
-git init
+$ cd /Users/user/my_project
+$ git init
+Initialized empty Git repository in /Users/user/my_project/.git/
 ```
 
 

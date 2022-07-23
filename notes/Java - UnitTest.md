@@ -1,10 +1,10 @@
-# 单元测试
+# 单元测试🌵
 
 单元测试是编写测试代码，用以检测特定的、明确的功能。单元测试只针对功能点进行测试，不包括对业务流程正确性的测试。
 
 
 
-# Junit
+# Junit🌵
 
 ## Junit4
 
@@ -43,7 +43,7 @@ Spring Boot 2.2.0 版本开始引入 JUnit 5 作为单元测试默认库
 
 - Junit Jupiter：Junit Jupiter提供了JUnit5的新的编程模型，是Junit5新特性的核心。内部 包含了一个**测试引擎**，用于在Junit Platform上运行。
 
-- Junit Vintage：由于JUint已经发展多年，为了照顾老的项目，Junit Vintage提供了兼容JUnit4.x,Junit3.x的测试引擎。
+- Junit Vintage：由于JUint已经发展多年，为了照顾老的项目，Junit Vintage 提供了兼容 JUnit4.x 、Junit3.x 的测试引擎。
 
 <img src="http://store.secretcamp.cn/uPic/image-20210623202208657202106232022081624450928WmeLiQWmeLiQ.png" alt="image-20210623202208657" style="zoom:50%;" />
 
@@ -137,7 +137,7 @@ JUnit 5 中的假设类似于断言，不同之处在于不满足的断言会使
 
 
 
-# Spring-test
+# Spring-test🌵
 
 ## 问题分析
 
@@ -216,7 +216,7 @@ junit 中集成了一个 main 方法，该方法就会判断当前测试类中�
 
 
 
-## 配置注解
+## 简单配置
 
 先使用 `@RunWith` 注解替换原有运行器，再使用 `@ContextConfiguration` 指定 ioc 配置文件
 
@@ -242,9 +242,260 @@ public class AccountNewTest {
 
 
 
-# Springboot-test
+## 测试框架的组成部分
+
+- `TestContext`： 一个测试方法对应一个 `TestContext`，由 `TestContextManager` 管理。
+- `TestExecutionListener`：测试方法或类上常会有一些注解，对其的解析操作交由对应的 `TestExecutionListener` 执行，比如事务管理、依赖注入等。
+- `TestContextManager`：一个测试类对应一个 `TestContextManager`，用于管理 `TextContext` ，并触发注册的`TextExecutionListener` 去干活。
+- `SmartContextLoader`：用于加载 `ApplicationContext` ，提供对 component classes、active bean definition profiles、test property sources、context hierarchies、WebApplicationContext 的支持
+- `TestContextBootStrappers`：为 `TestContextManager` 加载各种 `TestExecutionListener` 的实现，并为当前测试方法创建`TestContext` 。
+
+
+
+## Bootstrapper
+
+`TestContextBootstrapper` 定义了一套 Spring 测试框架启动相关的 SPI ，`TestContextManager` 可以使用 `TestContextBootstrapper` 去加载 `TestExecutionListener` 形成每个单元测试的 `TestContext` 。
+
+可以自定义 `TestContextBootstrapper` ，然后使用 `@BootstrapWith` 指定这个启动器。
+
+Spring-Test 会自动注册所有默认的  `TestExecutionListener` ，配置文件在 `org.springframework.test` 的 `META-INF/spring.factories`
+
+
+
+## 测试生命周期事件
+
+Spring-test 5.2 之后引入了 `EventPublishingTestExecutionListener` ，可以识别以下注解
+
+- `@BeforeTestClass`
+- `@PrepareTestInstance`
+- `@BeforeTestMethod`
+- `@BeforeTestExecution`
+- `@AfterTestExecution`
+- `@AfterTestMethod`
+- `@AfterTestClass`
+
+
+
+## 事务管理
+
+在 Spring-test 中，事务默认由 `TransactionalTestExecutionListener`  管理，
+
+用 `@Transactional` 标记一个测试方法，会让这个方法运行在事务的上下文中，并在事务完成后自动回滚。
+
+`@Transactional` 作用在方法上，但是不能作用在测试生命周期方法上（如被 `@BeforeTestClass` 修饰的方法）。
+
+
+
+## 测试环境整合
+
+### 整合Junit4
+
+Spring 通过自定义的 Runner 提供与 Junit 框架整合的能力，提供了一个 `SpringJUnit4Runner` 。
+
+```java
+// @RunWith(SpringRunner.class) 也可以
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = {"classpath:bean.xml"})
+public class SpringUnitTest01 {
+		// ...
+}
+```
+
+
+
+### 整合Junit5
+
+Spring提供了一个 `SpringExtension`  ，可以实现基于 Junit Jupiter 的标准单元，并提供了与 Spring 整合的能力。
+
+```java
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(locations = "classpath:bean.xml")
+public class SpringTestBase {
+		// ...
+}
+```
+
+
+
+也可以使用整合后的注解 `@SpringJUnitConfig`
+
+```java
+@SpringJUnitConfig(locations = "classpath:bean.xml")
+public class SpringTestBase {
+		// ...
+}
+```
+
+
+
+
+
+# Spring-test注解🌵
+
+## 通用注解
+
+### @BootstrapWith
+
+
+
+### @ContextConfiguration
+
+作用在类上，决定如何加载配置
+
+
+
+### @WebAppConfiguration
+
+作用在类上，声明加载的 `ApplicationContext` 是一个 `WebApplicationContext` ，web 应用的默认路径为 `file:src/main/webapp`
+
+
+
+
+
+### @ActiveProfiles
+
+作用在类上，决定应该加载哪一个 profile 
+
+```java
+@ContextConfiguration(locations = "classpath:bean.xml")
+@ActiveProfiles({"dev", "stage"}) 
+class DeveloperIntegrationTests {
+    // class body...
+}
+```
+
+
+
+
+
+### @TestPropertySource
+
+作用在类上，用于指定测试配置文件
+
+```java
+@ContextConfiguration(locations = "classpath:bean.xml")
+@TestPropertySource("/test.properties") 
+class MyIntegrationTests {
+    // class body...
+}
+```
+
+
+
+
+
+### @DirtiesContext
+
+`@DirtiesContext` 可以保证每个 test case 的执行上下文的独立性、隔离性
+
+
+
+
+
+### @TestExecutionListeners
+
+作用在类上，在测试类中，一些注解例如 `@Autowire` 是由 各种 `TestExecutionListener` 解析的，`@TestExecutionListeners` 的作用就是引入不同的 `TestExecutionListener` 。
+
+该注解允许我们手动引入自定义的 `TestExecutionListener` ， 要注意的是手动引入只会引入指定过的，默认 `TestExecutionListener` 不会被自定引入，除非显示引入了。
+
+```java
+@ContextConfiguration
+@TestExecutionListeners({
+    MyCustomTestExecutionListener.class,
+    ServletTestExecutionListener.class,
+    DirtiesContextBeforeModesTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DirtiesContextTestExecutionListener.class,
+    TransactionalTestExecutionListener.class,
+    SqlScriptsTestExecutionListener.class
+})
+class MyTest {
+    // class body...
+}
+```
+
+显然这样很麻烦，更好的方式是设置 Merge 模式：
+
+```java
+@ContextConfiguration
+@TestExecutionListeners(
+    listeners = MyCustomTestExecutionListener.class,
+    mergeMode = MERGE_WITH_DEFAULTS
+)
+class MyTest {
+    // class body...
+}
+```
+
+
+
+### @Commit
+
+`@Commit` 表示应在测试方法完成后提交事务性测试方法的事务，作用等价于 `@Rollback(false)`
+
+
+
+### @Rollback
+
+`@Rollback(true)` 表示测试方法完成后事务应该被回滚。
+
+
+
+### @Before/AfterTransaction
+
+
+
+## Spring JUnit 4 注解
+
+### @IfProfileValue
+
+为特定的测试环境启动测试
+
+```java
+@IfProfileValue(name="java.vendor", value="Oracle Corporation") 
+@Test
+public void testProcessWhichRunsOnlyOnOracleJvm() {
+    // ...
+}
+```
+
+
+
+### @ProfileValueSourceConfiguration
+
+
+
+### @Timed
+
+
+
+### @Repeat
+
+
+
+## Spring JUnit Jupiter注解
+
+### @SpringJUnitConfig
+
+
+
+### @SpringJUnitWebConfig
+
+
+
+
+
+# MockMvc🌵
+
+待学习
+
+
+
+# Springboot-test🌵
 
 ## 引入依赖
+
+Springboot 的单元测试支持由 `spring-boot-test` 以及  `spring-boot-test-autoconfigure` 支持，可以直接引入场景启动器 `spring-boot-starter-test` 。
 
 ```xml
 <dependency>
@@ -263,21 +514,68 @@ public class AccountNewTest {
 
 ## 基于Junit4
 
-SpringBoot 2.4 以上版本移除了默认对 Vintage 的依赖，如果需要兼容 junit4 则必须手动引入
+Springboot-test 默认依赖 Junit5，如果要使用 Junit4，有两种方法：
 
-```xml
-<dependency>
-    <groupId>org.junit.vintage</groupId>
-    <artifactId>junit-vintage-engine</artifactId>
-    <scope>test</scope>
-    <exclusions>
-        <exclusion>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-        </exclusion>
-    </exclusions>
-</dependency>
-```
+1. 引入 Junit-vintage
+
+   SpringBoot 2.4 以上版本移除了默认对 Vintage 的依赖，如果需要兼容 junit4 则必须手动引入
+
+   Junit-vintage 依赖了 Junit4
+
+   ```xml
+   <dependency>
+       <groupId>org.junit.vintage</groupId>
+       <artifactId>junit-vintage-engine</artifactId>
+       <scope>test</scope>
+       <exclusions>
+           <exclusion>
+               <groupId>org.hamcrest</groupId>
+               <artifactId>hamcrest-core</artifactId>
+           </exclusion>
+       </exclusions>
+   </dependency>
+   ```
+
+   
+
+
+
+2. 直接引入 Junit4
+
+   ```xml
+   <dependency>
+       <groupId>junit</groupId>
+       <artifactId>junit</artifactId>
+       <version>4.12</version>
+       <scope>test</scope>
+   </dependency>
+   ```
+
+   
+
+   
+
+3. 测试类：
+
+   这里的 `@Test` 是 `org.junit.Test` ，且必须要配合 `@RunWith(SpringRunner.class)`
+
+   ```java
+   @SpringBootTest(classes = DemoApplicationOne.class)
+   @RunWith(SpringRunner.class)
+   public class Junit4Test {
+       @Autowired
+       ApplicationContext ctx;
+   
+       @Test
+       public void test() {
+           for (String bean : ctx.getBeanDefinitionNames()) {
+               System.out.println(bean);
+           }
+       }
+   }
+   ```
+
+   
 
 
 
@@ -310,7 +608,7 @@ public class BeanTest {
 
 
 
-# 线上问题定位
+# 线上问题定位🌵
 
 ## top
 
