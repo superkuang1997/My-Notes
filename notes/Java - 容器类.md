@@ -1995,36 +1995,31 @@ public class demo_Comparable{
 
 `Comparable` 和 `Comparator` 的区别
 
-- `Comparable`：强行对实现它的每个类的对象进行整体排序。这种排序被称为类的自然排序，类的compareTo方法被称为它的自然比较方法。只能在类中实现 `compareTo()` 一次，不能经常修改类的代码实现自己想要的排序。实现此接口的对象列表（和数组）可以通过`Collections.sort` 和 `Arrays.sort` 进行自动排序，对象可以用作有序映射中的键或有序集合中的元素，无需指定比较器。
+- `Comparable`：强行对实现它的每个类的对象进行整体排序。这种排序被称为类的自然排序，类的 `compareTo` 方法被称为它的自然比较方法。只能在类中实现 `compareTo()` 一次，不能经常修改类的代码实现自己想要的排序。实现此接口的对象列表（和数组）可以通过`Collections.sort` 和 `Arrays.sort` 进行自动排序，对象可以用作有序映射中的键或有序集合中的元素，无需指定比较器。
 
 - `Comparator`：强行对某个对象进行整体排序。可以将 `Comparator` 传递给 `Collections.sort`或 `Arrays.sort` 方法，从而允许在排序顺序上实现精确控制。
 
 
 
 ```java
-public class demo_Comparator {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("python");
-        list.add("java");
-        list.add("golang");
-        list.add("c++");
-        list.add("ruby");
-        
-        // 排序
-        Collections.sort(list, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o1.length() - o2.length();
-            }
-        });
-        
-        // 打印
-        for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-            System.out.println(iter.next());
-        }
+// 根据字符串长度排序
+Collections.sort(list, new Comparator<String>() {
+    @Override
+    public int compare(String o1, String o2) {
+        return o1.length() - o2.length();
     }
-}
+});
+
+
+// 根据int数组的第一位和第二位大小排序
+int[][] matrix = new int[][]{{1, 5}, {2, 4}, {1, 3}};
+Arrays.sort(matrix, (o1, o2) -> {
+    if (o1[0] == o2[0]) {
+        return o1[1] - o2[1];
+    }
+    return o1[0] - o2[0];
+});
+
 ```
 
 
