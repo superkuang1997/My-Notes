@@ -12,8 +12,6 @@ JavaME（Java Micro Edition）：微型版，定位在消费性电子产品的�
 
 ## 相关概念
 
-
-
 JVM（Java Virtual Machine）就是一个虚拟的用于执行bytecode字节码的虚拟计算机
 
 JRE（Java Runtime Environment ）包含：Java虚拟机、库函数、运行Java应用程序所必须的文件。
@@ -35,40 +33,39 @@ java -version
 
 1. 编写Java代码，保存为 `Welcome.java` ，文件名必须和类名一致
 
-```java
-public class Welcome {
-	public static void main (String[] args){
-		System.out.println("hello world!");
-	}
-}
-```
+    ```java
+    public class Welcome {
+        public static void main (String[] args){
+            System.out.println("hello world!");
+        }
+    }
+    ```
 
   
 
-- 关键字public被称作访问修饰符（access modifier），用于控制程序的其它部分对这段代码的访问级别。
-- 关键字class的意思是类，Java是面向对象的语言，所有代码必须位于类里面。
-- 一个源文件中至多只能声明一个public的类，其它类的个数不限，如果源文件中包含一个public类，源文
-- 文件名必须和其中定义的`public`的类名相同，且以“java”为扩展名一个源文件可以包含多个类class。
-- 正确编译后的源文件，会得到相应的字节码文件，编译器为每个类生成独立的字节码文件，且将字节码文件自动命名为类的名字且以“.class”为扩展名。
-- main方法是Java应用程序的入口方法，有固定的书写格式：`public static void main(String[] args){...}`
+- 关键字 public 被称作访问修饰符（access modifier），用于控制程序的其它部分对这段代码的访问级别。
+- 关键字 class 的意思是类，Java 是面向对象的语言，所有代码必须位于类里面。
+- 一个源文件中至多只能声明一个 public 的类，其它类的个数不限，如果源文件中包含一个 public 类，源文件的文件名必须和其中定义的public 的类名相同，且以 .java 为扩展名一个源文件可以包含多个类 Class。
+- 正确编译后的源文件，会得到相应的字节码文件，编译器为每个类生成独立的字节码文件，且将字节码文件自动命名为类的名字且以 .class 为扩展名。
+- main 方法是 Java 应用程序的入口方法，有固定的书写格式：`public static void main(String[] args){...}`
 
 
 
 2. 编译文件
 
-```
-javac Test.java
-```
-
-会生成一个 `Welcome.class` 文件
-
-
+    会生成一个 `Welcome.class` 文件
+    
+    ```sh
+    javac Test.java
+    ```
+    
+    
 
 3. 执行文件
 
-```
-java Welcome.class
-```
+    ```sh
+    java Welcome.class
+    ```
 
 
 
@@ -90,9 +87,9 @@ Java注释的内容不会出现在字节码文件中
 
 
 
-## 环境变量
+## 环境变量配置
 
-1. Linux
+1. Linux（Mac OS）
 
    ```sh
    tar -xzvf jdk-8u131-linux-x64.tar.gz
@@ -111,7 +108,7 @@ Java注释的内容不会出现在字节码文件中
 
    将该路径配置到 `PATH` ： `%JAVA_HOME%\bin`
 
-   不要直接配置绝对路径，如 `C:\Program Files\Java\jdk1.8.0_261\bin`，否则某些程序会出错
+   不要省略 `JAVA_HOME` 直接配置绝对路径，如 `C:\Program Files\Java\jdk1.8.0_261\bin`，否则某些程序会出错
 
 
 
@@ -119,39 +116,9 @@ Java注释的内容不会出现在字节码文件中
 
 1. 编写源代码（.java）
 2. 编译器编译编代码，并生成字节码文件（.class）
-3. JVM读取和执行字节码文件
+3. JVM 读取和执行字节码文件
 
 
-
-# Java命令行工具🔥
-
-## jstat
-
-监听虚拟机运行状态
-
-
-
-## jinfo
-
-查看和修改虚拟机参数
-
-
-
-## jmap
-
-用于查看堆信息以及生成堆的转储快照。
-
-
-
-## jhat
-
-分析dump文件的命令
-
-
-
-## jstack
-
-堆栈追踪工具，用于生成线程快照，常用于定位死锁问题
 
 
 
@@ -315,8 +282,6 @@ int 在 Java 内部是用 32 位来表示的，而最高位是表示符号，因
 
 
 
-
-
 `Integer.MIN_VALUE = 0x80000000`
 
 二进制表示为 `10000000000000000000000000000000` ，一共 32 位，第一位为 1 表示负数
@@ -357,9 +322,9 @@ int 在 Java 内部是用 32 位来表示的，而最高位是表示符号，因
 
 ### 浮点型
 
-float的0-22位表示尾数，23-30位（8位）表示指数，31位表示符号位。
+float 的 0-22 位表示尾数，23-30 位（8位）表示指数，31 位表示符号位。
 
-double的0-51表示尾数，52-62（11位）表示指数，63位表示符号位。
+double 的 0-51 表示尾数，52-62（11位）表示指数，63 位表示符号位。
 
 | 类型   | 占用存储空间 | 表数范围               | 后缀 |
 | ------ | ------------ | ---------------------- | ---- |
@@ -368,27 +333,21 @@ double的0-51表示尾数，52-62（11位）表示指数，63位表示符号位�
 
 浮点数不精确，不要用于比较。`java.math` 包下面的两个有用的类：`BigInteger` 和 `BigDecimal`，这两个类可以处理任意长度的数值。 `BigInteger` 实现了任意精度的整数运算，`BigDecimal` 实现了任意精度的浮点运算。
 
-科学计数法：
-
-314E2 = 314&times;10<sup>2</sup>
-
-314E-2 = 314&times;10<sup>-2</sup>
-
-
-
 
 
 ### 字符型
 
 char 类型表示在 Unicode 编码表中的字符，char 类型占用固定的 2byte 空间来表示字符。
 
-Unicode 编码被设计用来处理各种语言的所有文字，它占2个字节，可允许有 65536 个字符；ASCI 码占 1 个字节，可允许有 128 个字符（最高位是0），是 Unicode 编码表中前 128 个字符。
+Unicode 编码被设计用来处理各种语言的所有文字，它占 2 个字节，可允许有 65536 个字符；ASCI 码占 1 个字节，可允许有 128 个字符（最高位是0），是 Unicode 编码表中前 128 个字符。
 
 字符型还可以用 Unicode 来表示
 
 ```java
 char Str = '\u0061';
 ```
+
+Java 中的转义符：转义字符出现在特殊字符之前会将特殊字符转换成普通字符
 
 | 转义符 | 含义？ | Unicode值 |
 | ------ | ------ | --------- |
@@ -423,25 +382,29 @@ Person p = new Person();
 
 ## 数据类型转换
 
-### 自动类型转换
+### 隐式（自动）类型转换
 
-自动转换：将 取值范围小的类型 自动提升为 取值范围大的类型 。
+自动转换：将表数范围小的类型 自动提升为 表数范围小 的类型 。
 
-这里的 "大" 与 "小"，并不是指占用字节的多少，而是指表示值的范围的大小。
+这里取值范围的 "大" 与 "小"，并不是指占用字节的多少，而是指表示值的范围的大小。
 
 float（4字节）表数范围（-10<sup>38</sup> ~ 10<sup>38</sup>），比 long（8字节）表数范围（-2<sup>-63</sup> ~ 2<sup>63</sup>-1）大
 
-整型常量可以直接赋值给byte、short、char等类型变量，而不需要进行强制类型转换，只要不超出其表数范围即可。
+整型常量可以直接赋值给 byte、short、char 等类型变量，而不需要进行强制类型转换，只要不超出其表数范围即可。
 
 
 
-1）表述范围小向表数范围大转换
+规则：「表数范围小」向「表数范围大」转换
+
+表数范围大的类型可以兼容表数范围小的类型，所以可以进行自动类型转换
+
+此处将 int 类型变量 a 的值赋值给 double 类型变量 b，因为是小类型转换成大类型，int 类型变量 a 的值会自动转换成 double 类型并赋值给变量 b
 
 ```java
 byte、short、char ‐‐> int ‐‐> long ‐‐> float ‐‐> double
-    
-short a = 12;    // ✔ 合法
-short a = 1234;  // ✖ 不合法 超出了表数范围
+
+int a = 5;
+double b = a;
 ```
 
 | 操作数1类型                          | 操作数2类型 | 转换后类型 |
@@ -453,41 +416,12 @@ short a = 1234;  // ✖ 不合法 超出了表数范围
 
 
 
-2）char向整型转换时会转为对应ASCII码
 
-```java
-char c = 'c';
-int num1 = c;    // 99
-int num2 = 'a';  // 97
-```
+### 显式（强制）类型转换
 
+将表数范围大的数据转换为表数范围小的数据时，必须使用强制类型转换。
 
-
-3）byte、short、char 运算时直接提升为 int 
-
-分析：
-
-- `byte result1 = 40 + 50` ：`40` 和 `50` 是固定不变的常量，编译器确定 `40+50` 的结果不超过byte的表数范围，所以编译通过。
-
-- `byte result = num1 + num2`，`num1` 和 `num2` 是变量，编译器不确定 `num1 + num2` 的结果，因此会将结果以int类型处理，但int类型不能赋值给 byte 类型，所以编译不通过。
-
-```java
-/*
-	byte + byte → int + int → int
-*/
-byte num1 = 40;
-byte num2 = 50;
-byte result1 = 40 + 50  // 90
-byte result = num1 + num2  // 编译不通过，int无法自动转换成byte     
-```
-
-
-
-### 强制类型转换
-
-将 “大” 数据转换为 “小” 数据时，你可以使用强制类型转换。
-
-浮点型转整型会损失小数位
+强转有可能产生精度丢失，浮点数到整数的转换是通过舍弃小数得到，而不是四舍五入
 
 ```java
 double x = 3.99;
@@ -502,7 +436,82 @@ char c = (char)i;
 System.out.println(c); // c
 ```
 
+对于 `+=`、`-=` 等符号，事实上是自带了强制转换
 
+```java
+short a = 1;
+a += 1;     // 编译正确，相当于 a = (short)(a + 1)
+a = a + 1;  // 编译错误
+```
+
+
+
+### byte、short、char转换规则 
+
+规则：
+
+- byte、short、char 类型（比 int 表数范围小的类型）在运算时，java编译会统一强转成 int 类型
+
+- byte、short、char 不参与运算，整数直接量可以直接赋值给 byte、short、char，不需要强转
+
+- byte、short、char 参与运算时，byte、short、char 型变量需要强转
+
+```java
+byte a1 = 5;
+byte a2 = 10;
+// a1 + a2 计算后提升成了int类型，不能直接赋给byte，需要强转
+byte a3 = (byte) (a1 + a2);
+```
+
+
+
+```java
+/*
+    byte + byte → int + int → int
+*/
+byte num1 = 40;
+byte num2 = 50;
+byte result1 = 40 + 50  // 90
+byte result = num1 + num2  // 编译不通过，int无法自动转换成byte     
+```
+
+分析：
+
+- `byte result1 = 40 + 50` ：40 和 50 是固定不变的常量，编译器确定 40+50 的结果不超过 byte 的表数范围，所以编译通过。
+
+- `byte result = num1 + num2`，num1 和 num2 是变量，编译器不确定 num1 + num2 的结果，因此会将结果以 int 类型处理，但 int 类型不能赋值给 byte 类型，所以编译不通过。
+
+
+
+### char转换规则
+
+char 向整型转换时会转为对应 ASCII 码
+
+```java
+char c = 'c';
+int num1 = c;    // 99
+int num2 = 'a';  // 97
+```
+
+
+
+## 浮点精度
+
+### 大小比较
+
+一般：允许与 0.0f 、0.0d 等浮点数做大小算术比较
+
+良好：大小比较时可以使用包装类的 `compare#` 方法
+
+优秀： `BigDecimal`
+
+
+
+### 相等比较
+
+禁止：不允许与0.0f 、0.0d 等浮点数做 == 算术比较，不允许包装类之间使用 `equals` 或者 `compareTo(another) == 0` 作相等比较
+
+建议：计算绝对是是否小于 1e-6
 
 
 
@@ -547,25 +556,9 @@ System.out.println(-10%3);  // -1
 
 ```java
 int a = 3;
-- int b = a++  // 先赋值，后自增
-- int b = ++a  // 先自增，后赋值
+int b = a++  // 先赋值，后自增
+int b = ++a  // 先自增，后赋值
 ```
-
-
-
-### += 符号的扩展
-
-下面的程序有问题吗？
-
-```java
-public static void main(String[] args){
-	short s = 1;
-	s += 1;
-	System.out.println(s);
-}
-```
-
-分析： `s += 1` 逻辑上看作是 `s = s + 1` ，计算结果被提升为int类型，再向short类型赋值时发生错误，因为不能将取值范围大的类型赋值到取值范围小的类型。但是，  `s = s + 1` 是进行了两次运算 ， 但 `+=` 是一个运算符，只运算一次，并带有强制转换的特点，也就是说 `s += 1` 等价于 `s = (short)(s + 1)` ，因此程序没有问题编译通过，运行结果是2。
 
 
 
@@ -820,30 +813,6 @@ public static void main(String[] args) {
 
 
 
-## label & continue
-
-```java
-public static void main(String[] args) {
-    outer:  // 设置标签outer
-    for (int i = 101; i < 150; i++) {
-        for (int j = 2; j <= i / 2; j++) {
-            if (i % j == 0) {
-                continue outer;  // 跳转到outer
-            }
-        }
-        System.out.println(i);
-    }
-}
-```
-
-
-
-## 语句块
-
-语句块（有时叫做复合语句），是用花括号扩起来的任意数量的简单Java语句。
-
-块确定了局部变量的作用域。块中的程序代码，作为一个整体，是要被一起执行的。快可以被嵌套在另一个块中，但是不能在两个嵌套的块内声明同名的变量。语句块可以使用外部的变量，而外部不能使用语句块中定义的变量，因为语句块中定义的变量作用域只限于语句块。
-
 
 
 # 方法🔥
@@ -871,6 +840,16 @@ int add(int a, int b, int c) {  // 返回值为int类型
     return a + b + c;
 }
 ```
+
+
+
+## 参数传递
+
+Java中，方法中所有参数都是值传递，也就是传递的是 "值的副本" 。
+
+- 基本数据类型：传递的是值的副本，副本改变不会影响原件。
+
+- 引用数据类型：传递的是值的副本，根据引用数据类型的特性，这里传递的是值的引用，也就是对象的地址。
 
 
 
@@ -1003,7 +982,7 @@ for (int min = 0, max = arr.length-1; min < max; min++, max--) {
 }
 ```
 
-`for-each` 专门用于读取数组或集合中所有的元素，即对数组进行遍历。
+增强 for 循环专门用于读取数组或集合中所有的元素，即对数组进行遍历。
 
 ```java
 int[] arr = {1, 2, 3};
@@ -1022,30 +1001,6 @@ for (int i : arr) {
 int[] oldArr = new int[]{1, 2, 3};        
 int[] newArr = Arrays.copyOf(oldArr, 5);  // [1, 2, 3, 0, 0]
 ```
-
-
-
-## 反转数组
-
-```java
-public class demo {
-    public static void main(String[] args) {
-        int[] arr = {1, 2, 3, 4, 5, 6};
-        // 反转数组 空间复杂度O(n)
-        for (int min = 0, max = arr.length-1; min < max; min++, max--) {
-            int temp = arr[min];
-            arr[min] = arr[max];
-            arr[max] = temp;
-        }
-        // 遍历数组
-        for (int i : arr) {
-            System.out.println(i);
-        }
-    }
-}
-```
-
-
 
 
 
@@ -1240,4 +1195,24 @@ public class Student implements Cloneable {
     }
 }
 ```
+
+
+
+
+
+# QA
+
+## +=符号的扩展
+
+下面的程序有问题吗？
+
+```java
+public static void main(String[] args){
+	short s = 1;
+	s += 1;
+	System.out.println(s);
+}
+```
+
+分析： `s += 1` 逻辑上看作是 `s = s + 1` ，计算结果被提升为 int 类型，再向 short 类型赋值时发生错误，因为不能将取值范围大的类型赋值到取值范围小的类型。但是，  `s = s + 1` 是进行了两次运算 ， 但 `+=` 是一个运算符，只运算一次，并带有强制转换的特点，也就是说 `s += 1` 等价于 `s = (short)(s + 1)` ，因此程序编译通过，运行结果是 2
 

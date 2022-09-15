@@ -425,13 +425,55 @@ Maven 是否需要和用户交互以获得输入。如果 Maven 需要和用户�
 
 用来配置不同的代理，多代理 profiles 可以应对笔记本或移动设备的工作环境，通过简单的设置就可以很容易的更换整个代理配置。
 
+```xml
+<proxies>
+    <proxy>
+         <!--唯一标识-->
+         <id>my-proxy</id>
+         <!--true则激活此代理 -->
+         <active>true</active>
+         <!--代理的协议-->
+         <protocol>http</protocol>
+         <!--代理的主机名-->
+         <host>proxy.somewhere.com</host>
+         <!--代理的端口-->
+         <port>8080</port>
+         <!--代理的用户名，用户名和密码表示代理服务器认证的登录名和密码。 -->
+         <username>proxyuser</username>
+         <!--代理的密码-->
+         <password>somepassword</password>
+         <!--不该被代理的主机名列表。该列表的分隔符由代理服务器指定；例子中使用了竖线分隔符，使用逗号分隔也很常见。-->
+         <nonProxyHosts>*.google.com|ibiblio.org</nonProxyHosts>
+    </proxy>
+</proxies>
+```
+
 
 
 ## servers
 
 指定连接到特定服务器时要使用的身份验证信息
 
-
+```xml
+<servers>
+    <server>
+     <!--该id与distributionManagement中repository元素的id相匹配。-->
+     <id>server001</id>
+     <!--鉴权用户名。鉴权用户名和鉴权密码表示服务器认证所需要的登录名和密码。 -->
+     <username>my_login</username>
+     <!--鉴权密码 密码加密功能已被添加到2.1.0 +。详情请访问密码加密页面-->
+     <password>my_password</password>
+     <!--鉴权时使用的私钥位置。和前两个元素类似，私钥位置和私钥密码指定了一个私钥的路径（默认是${user.home}/.ssh/id_dsa）以及如果需要的话，一个密语。将来passphrase和password元素可能会被提取到外部，但目前它们必须在settings.xml文件以纯文本的形式声明。 -->
+     <privateKey>${usr.home}/.ssh/id_dsa</privateKey>
+     <!--鉴权时使用的私钥密码。-->
+     <passphrase>some_passphrase</passphrase>
+     <!--文件被创建时的权限。如果在部署的时候会创建一个仓库文件或者目录，这时候就可以使用权限（permission）。这两个元素合法的值是一个三位数字，其对应了unix文件系统的权限，如664，或者775。 -->
+     <filePermissions>664</filePermissions>
+     <!--目录被创建时的权限。 -->
+     <directoryPermissions>775</directoryPermissions>
+    </server>
+</servers>
+```
 
 
 
@@ -452,6 +494,33 @@ Maven 是否需要和用户交互以获得输入。如果 Maven 需要和用户�
         <url>http://maven.aliyun.com/nexus/content/repositories/central/</url>
     </mirror>
 </mirrors>
+```
+
+
+
+## os
+
+```xml
+<os>
+    <!--激活profile的操作系统的名字 -->
+    <name>Windows 7</name>
+    <!--激活profile的操作系统所属家族(如'windows')  -->
+    <family>Windows</family>
+    <!--激活profile的操作系统体系结构  -->
+    <arch>x64</arch>
+    <!--激活profile的操作系统版本-->
+    <version>5.1.2600</version>
+</os>
+```
+
+
+
+## activeProfiles
+
+```xml
+<activeProfiles>
+    <activeProfile>env-test</activeProfile>
+</activeProfiles>
 ```
 
 
@@ -532,9 +601,6 @@ profile 匹配有优先级，首先匹配 jdk，然后才会考虑其他条件
                 <layout>default</layout>
             </repository>
         </repositories>  
-        <!-- 插件远程仓库列表，配置同上 -->
-        <pluginRepositories>
-        </pluginRepositories>
     </profile>
 </profiles>
 ```
@@ -543,57 +609,11 @@ profile 匹配有优先级，首先匹配 jdk，然后才会考虑其他条件
 
 
 
-## activeProfiles
-
-```xml
-<activeProfiles>
-    <activeProfile>env-test</activeProfile>
-</activeProfiles>
-```
-
-
-
-## 模板
-
-```xml
-    <profiles>
-        <profile>
-            <id>simple-jdk-8</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-                <jdk>1.8</jdk>
-            </activation>
-            <properties>
-                <maven.compiler.source>1.8</maven.compiler.source>
-                <maven.compiler.target>1.8</maven.compiler.target>
-                <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-                <mysql.version>5.1.6</mysql.version>
-
-            </properties>
-        </profile>
-        <profile>
-            <id>simple-jdk-11</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <jdk>11</jdk>
-            </activation>
-            <properties>
-                <maven.compiler.source>11</maven.compiler.source>
-                <maven.compiler.target>11</maven.compiler.target>
-                <maven.compiler.compilerVersion>11</maven.compiler.compilerVersion>
-                <mysql.version>8.0.23</mysql.version>
-            </properties>
-        </profile>
-    </profiles>
-```
-
 
 
 # pom.xml🌀
 
 POM 是项目对象模型（Project Object Model）的简称，它是 Maven 项目中的文件。
-
-
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -810,39 +830,81 @@ Maven 会沿着父子层次向上走，直到找到一个拥有 `<dependencyMana
 
 
 
-## 模板
-
-```
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-```
-
-
-
 # 插件🌀
+
+## maven-resources-plugin
+
+maven-resources-plugin 用来处理资源文件
+
+
+
+## maven-compiler-plugin
+
+使用 maven-compiler-plugin 插件可以指定项目源码的 jdk 版本。
+
+如果不告诉 maven 代码要使用什么样的 jdk 版本编译，它就会用 maven-compiler-plugin 默认的 jdk 版本来进行处理，这样就容易出现版本不匹配，以至于可能导致编译不通过的问题。
+
+简易版：
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>3.1</version>
+    <configuration>             
+        <source>1.8</source>
+        <target>1.8</target>
+        <encoding>UTF-8</encoding>
+    </configuration>
+</plugin>
+```
+
+
+
+全量版：
+
+```xml
+<plugin>
+    <!-- 指定maven编译的jdk版本,如果不指定,maven3默认用jdk 1.5 maven2默认用jdk1.3 -->
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>3.1</version>
+    <configuration>
+        <!-- 一般而言，target与source是保持一致的 -->
+        <!-- 但是，有时候为了让程序能在其他版本的jdk中运行，会存在target不同于source的情况 -->                    
+        <source>1.8</source> <!-- 源代码使用的JDK版本 -->
+        <target>1.8</target> <!-- 需要生成的目标class文件的编译版本 -->
+        <!-- 字符集编码 -->
+        <encoding>UTF-8</encoding>
+        <!-- 跳过测试 -->
+        <skipTests>true</skipTests>
+        <verbose>true</verbose>
+        <showWarnings>true</showWarnings>
+        <!-- 要使compilerVersion标签生效，还需要将fork设为true，用于明确表示编译版本配置的可用 -->
+        <fork>true</fork>
+        <!-- 使用指定的javac命令，例如：${JAVA_1_4_HOME}/bin/javac</executable> -->
+        <executable>path-to-javac</executable><executable>
+        <!-- 指定插件将使用的编译器的版本 -->
+        <compilerVersion>1.3</compilerVersion>
+        <!-- 编译器使用的初始内存 -->
+        <meminitial>128m</meminitial>
+        <!-- 编译器使用的最大内存 -->
+        <maxmem>512m</maxmem>
+        <!-- 这个选项用来传递编译器自身不包含但是却支持的参数选项 -->
+        <compilerArgument>-verbose -bootclasspath ${java.home}\lib\rt.jar</compilerArgument>
+    </configuration>
+</plugin>
+```
+
+
+
+
 
 ## maven-assembly-plugin
 
 👉 [官方文档](http://maven.apache.org/plugins/maven-assembly-plugin/)
 
-
-
 maven-assembly-plugin 使开发人员能够将项目输出合并到一个单独的可分发存档中，该存档包含依赖项、模块、站点文档和其他文件。
-
-
-
-### 配置pom.xml
 
 ```xml
 <build>
@@ -878,7 +940,7 @@ maven-assembly-plugin 使开发人员能够将项目输出合并到一个单独�
 
 
 
-### 配置描述符
+### descriptor
 
 👉 [自定义描述符](http://maven.apache.org/plugins/maven-assembly-plugin/assembly.html)
 
@@ -947,6 +1009,16 @@ assembly 插件的打包方式是通过 descriptor（描述符）来定义的，
 </assembly>
 
 ```
+
+
+
+
+
+## maven-surefire-plugin
+
+Surefire 插件在 test 构建生命周期阶段用于执行应用程序的单元测试。
+
+
 
 
 

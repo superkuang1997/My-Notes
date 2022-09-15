@@ -1,6 +1,6 @@
 # 异常
 
-**异常机制本质**
+## 异常机制本质
 
 当程序出现错误，程序安全退出的机制。
 
@@ -39,28 +39,32 @@ Exception是程序本身能够处理的异常，`Exception类`是所有异常类
 
 ### CheckedException已检查异常
 
-所有不是RuntimeException的异常，统称为Checked Exception，又被称为“已检查异常”。
+所有不是 RuntimeException 的异常，统称为 Checked Exception，又被称为“已检查异常”。
 
-如`IOException`、`SQLException`等以及用户自定义的Exception异常，这类异常在编译时就必须做出处理，否则无法通过编译。
+如 `IOException`、`SQLException` 等以及用户自定义的 Exception 异常，这类异常在编译时就必须做出处理，否则无法通过编译。
 
 处理方式有两种：
 
 1. 使用`try/catch`捕获异常
 2. 使用`throws`声明异常
 
+
+
 ## 捕获异常
 
 捕获异常是通过3个关键词来实现的：`try-catch-finally`
 
-用`try`来执行一段程序，如果出现异常，系统抛出一个异常，可以通过它的类型`catch`并处理它，最后是通过`finally`语句为异常处理提供一个统一的出口，`finally`所指定的代码都要被执行。
+用`try`来执行一段程序，如果出现异常，系统抛出一个异常，可以通过它的类型`catch`并处理它，最后是通过`finally`语句为异常处理提供一个统一的出口，`finally` 所指定的代码都要被执行。
 
 
 
 ## 声明异常
 
-当`CheckedException`产生时，不一定立刻处理它，可以再把异常throws出去。
-在方法中可以使用`try-catch-finally`来处理异常，但是在一些情况下，当前方法并不需要处理发生的异常，而是向上传递给调用它的方法处理。
+当 `CheckedException` 产生时，不一定立刻处理它，可以再把异常throws出去。
+在方法中可以使用 `try-catch-finally` 来处理异常，但是在一些情况下，当前方法并不需要处理发生的异常，而是向上传递给调用它的方法处理。
 如果一个方法中可能产生某种异常，但是并不能确定如何处理这种异常，则应根据异常规范**在方法的首部声明该方法可能抛出的异常**。
+
+
 
 ## 自定义异常
 
@@ -114,78 +118,33 @@ Java堆用于存储对象实例，只要不断地创建对象，并且保证 GC 
 
 
 
-# 二、Junit单元测试
-
-## 2.1 测试分类
-
-- 黑盒测试：不需要写代码，给输入值，看程序是否能够输出期望的值。
-
-- 白盒测试：需要写代码，关注程序具体的执行流程。
 
 
+## Thread.setUncaughtExceptionHandler
 
-## 2.2 @Test
+线程中的异常直接加 try catch 捕获不到的，因为 try catch 的当前线程是 main 线程，异常是在子线程里面发生的，不属于 main 线程。
 
-首先创建 `Calculator` 类
+`Thread#setUncaughtExceptionHandler` 该方法用于获取线程运行时异常
 
 ```java
-public class Calculator {
+public class ThreadUncaughtException {
 
-    public int add(int a, int b) {
-        return a + b;
+    public static void main(String[] args) {
+        Thread t1 = new Thread("t1"){
+            @Override
+            public void run() {
+                throw new RuntimeException("wrong");
+            }
+        };
+        t1.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                System.out.println(t.getName() + "; error=" + e.getMessage());
+            }
+        });
+
+        t1.start();
     }
 }
-```
-
-创建测试类
-
-```java
-public class CalculatorTest {
-    @Test  // 无需main方法
-    public void testAdd() {
-        Calculator cal = new Calculator();
-        int result = cal.add(3, 4);
-        // 断言
-        Assert.assertEquals(8, result);
-    }
-}
-
-// java.lang.AssertionError: 
-// 预期:8
-// 实际:7
-```
-
-
-
-## 2.3 @Before 和 @After
-
-- `@Before`：修饰的方法会在测试方法之前被自动执行
-
-- `@After`：修饰的方法会在测试方法执行之后自动被执行。
-
-```java
-public class CalculatorTest {
-    @Before
-    public void init() {
-        System.out.println("init...");
-    }
-    @After
-    public void close() {
-        System.out.println("close...");
-    }
-
-    @Test
-    public void testAdd() {
-        System.out.println("testAdd 测试方法执行");
-        Calculator cal = new Calculator();
-        int result = cal.add(3, 4);
-        // 断言
-        Assert.assertEquals(7, result);
-    }
-}
-
-// init...
-// testAdd 测试方法执行
-// close...
 ```
 

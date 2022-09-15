@@ -12,8 +12,6 @@ Spring Web MVC 是一个基于 Servlet API 的 Web 框架，即众所周知的 S
 
 
 
-
-
 ## MVC
 
 MVC（Model、View、Controller），是模型－视图－控制器的缩写，是一种用于设计创建 Web 应用程序表现层的模式。

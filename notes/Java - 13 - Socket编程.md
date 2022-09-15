@@ -26,6 +26,8 @@ TCP通信能实现两台计算机之间的数据交互，通信的两端，要�
 1. 客户端：`java.net.Socket` 类表示。创建 `Socket` 对象，向服务端发出连接请求，服务端响应请求，两者建立连接开始通信。
 2. 服务端：`java.net.ServerSocket` 类表示。创建 `ServerSocket` 对象，相当于开启一个服务，并等待客户端的连接。
 
+<img src="C:\Users\Yorua\OneDrive - 东南大学\Notebook\notes\assets\image-20220912203940947.png" alt="image-20220912203940947" style="zoom:67%;" />
+
 
 
 ## Socket类  
@@ -305,5 +307,4 @@ public class TCPClient {
     }
 }
 ```
-
 
