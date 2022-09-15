@@ -1563,15 +1563,114 @@ git config --global core.quotepath false
 
 
 
-## 使用SSH
+## ssh配置
 
 参考官方文档：https://docs.github.com/cn/github/authenticating-to-github/connecting-to-github-with-ssh
 
 
 
-## 管理多个SSH Key
+1. 生成 ssh-key
+
+    ```sh
+    ssh-keygen -t ed25519 -C "your_email@example.com"
+    ```
+
+2. 将 ssh-key 添加到 ssh-agent
+
+   ```sh
+   $ eval "$(ssh-agent -s)"
+   > Agent pid 59566
+   
+   $ ssh-add ~/.ssh/id_ed25519
+   ```
+
+3. 将公钥添加到 github
+
+
+
+
+
+## ssh-agent
+
+```sh
+# 自动启动 ssh-agent
+# 复制以下行并将其粘贴到`~/.profile` 或 `~/.bashrc` 文件中
+
+env=~/.ssh/agent.env
+
+agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }
+
+agent_start () {
+    (umask 077; ssh-agent >| "$env")
+    . "$env" >| /dev/null ; }
+
+agent_load_env
+
+# agent_run_state: 0=agent running w/ key; 1=agent w/o key; 2=agent not running
+agent_run_state=$(ssh-add -l >| /dev/null 2>&1; echo $?)
+
+if [ ! "$SSH_AUTH_SOCK" ] || [ $agent_run_state = 2 ]; then
+    agent_start
+    ssh-add
+elif [ "$SSH_AUTH_SOCK" ] && [ $agent_run_state = 1 ]; then
+    ssh-add
+fi
+
+unset env
+```
+
+
+
+```sh
+# 查看ssh代理
+ssh-add -l 
+
+# 删除所有ssh-key
+ssh-add -D
+```
+
+
+
+如果执行 `ssh host_pattern` ，则会转化为命令 `ssh username@host_domain`
+
+```sh
+# ssh-agent的config文件格式
+Host host_pattern   # 匹配ssh命令里的参数，然后根据相关配置，修改成ssh最终执行的命令
+     HostName host_domain
+     User username
+     IdentityFile~/.ssh/id-ed25519-github   # ssh连接要用到的 key file
+     IdentitiesOnly yes # 表示不让ssh去用默认的ssh key，只用指定的ssh key
+```
+
+
+
+## 管理多个ssh-key
+
+假设有以下密钥对：
+
+```
+id_rsa_github
+id_rsa_github.pub
+id_rsa_tencentcloud
+id_rsa_tencentcloud.pub
+```
+
+
 
 修改~/.ssh/config文件，增加以下文件内容
 
+```sh
+# github 
+Host github
+HostName github.com 
+PreferredAuthentications publickey
+IdentitiesOnly yes 
+IdentityFile ~/.ssh/id-ed25519-github  
 
+# tencentCloud
+Host tc
+HostName 124.xxx.214.xxx
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/id-ed25519-tencentcloud
+```
 
