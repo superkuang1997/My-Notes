@@ -791,6 +791,24 @@ Maven 会沿着父子层次向上走，直到找到一个拥有 `<dependencyMana
 
 `<build>` 标签应在 `<project>` 内，称为 project build，是 `<project>` 的直接子元素
 
+### resources
+
+```xml
+<build>
+    <resources>
+         <resource>
+             <directory>[your folder here]</directory>
+         </resource>
+        <resource>
+            <directory>src/main/user_resource_1</directory>
+        </resource>
+        <resource>
+            <directory>src/main/user_resource_2</directory>
+        </resource>
+    </resources>
+</build>
+```
+
 
 
 ### plugins
@@ -835,6 +853,33 @@ Maven 会沿着父子层次向上走，直到找到一个拥有 `<dependencyMana
 ## maven-resources-plugin
 
 maven-resources-plugin 用来处理资源文件
+
+默认情况下 maven 会读取 src/main/resources 的资源打包到 target 的 classes，如需修改，在 build 节点下面添加 resource 配置
+
+
+
+```xml
+<build>
+    <resources>
+        <resource>
+            ...
+        </resource>   
+    </resources>  
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          ...
+          <encoding>UTF-8</encoding>
+          ...
+        </configuration>
+      </plugin>
+    </plugins>
+    ...
+</build>
+```
 
 
 

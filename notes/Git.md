@@ -1661,7 +1661,7 @@ id_rsa_tencentcloud.pub
 
 ```sh
 # github 
-Host github
+Host github.com
 HostName github.com 
 PreferredAuthentications publickey
 IdentitiesOnly yes 

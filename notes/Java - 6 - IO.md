@@ -752,15 +752,19 @@ BufferedWriter bw = new BufferedWriter(new FileWriter("bw.txt"));
 
 
 
+## LineNumberReader
 
+`LineNumberReader` 继承自 `BufferedReader`，多了跟踪行号的功能，定义了 `setLineNumber(int)`  和 `getLineNumber()` 方法，分别起到设置行号和获取行号的作用。
+
+默认情况下，行编号从 0 开始，所以一开始获取行号为 0，每当换行一次，就会 +1
 
 
 
 # 转换流🍭
 
-`FileReader` 会查询IDE默认码表，将字节转换为字符（解码）
+`FileReader` 会查询 IDE 默认码表，将字节转换为字符（解码）
 
-`FileWriter` 会查询IDE默认码表，将字符转换为字节（解码）
+`FileWriter` 会查询 IDE 默认码表，将字符转换为字节（解码）
 
 以上两者只能读取默认的码表
 
